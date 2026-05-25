@@ -332,7 +332,7 @@ function PickStep({
         key={activeValue?.title ?? "hint"}
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-3 rounded-[1rem] border border-white/80 bg-white/76 p-3 shadow-soft"
+        className="sticky top-3 z-10 mb-3 rounded-[1rem] border border-white/80 bg-white/92 p-3 shadow-lift backdrop-blur-xl"
       >
         <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-honey">
           {activeValue ? "What it means" : "Tap a card"}
