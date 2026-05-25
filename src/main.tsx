@@ -280,12 +280,12 @@ function PickStep({
 }) {
   const canContinue = selected.length === target;
   const left = Math.max(target - selected.length, 0);
-  const [activeValue, setActiveValue] = React.useState<Value>(stepValues[0]);
+  const [activeValue, setActiveValue] = React.useState<Value | null>(null);
 
   React.useEffect(() => {
     setActiveValue((current) => {
       if (current && stepValues.some((value) => value.title === current.title)) return current;
-      return stepValues[0];
+      return null;
     });
   }, [stepValues]);
 
@@ -328,18 +328,22 @@ function PickStep({
         </div>
       </div>
 
-      {activeValue && (
-        <motion.div
-          key={activeValue.title}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-3 rounded-[1rem] border border-white/80 bg-white/76 p-3 shadow-soft"
-        >
-          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-honey">What it means</div>
-          <div className="mt-1 font-serif text-xl leading-5 text-ink">{activeValue.title}</div>
-          <p className="mt-1 text-xs leading-5 text-ink/62">{activeValue.description}</p>
-        </motion.div>
-      )}
+      <motion.div
+        key={activeValue?.title ?? "hint"}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-3 rounded-[1rem] border border-white/80 bg-white/76 p-3 shadow-soft"
+      >
+        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-honey">
+          {activeValue ? "What it means" : "Tap a card"}
+        </div>
+        <div className="mt-1 font-serif text-xl leading-5 text-ink">
+          {activeValue?.title ?? "See the meaning before you decide"}
+        </div>
+        <p className="mt-1 text-xs leading-5 text-ink/62">
+          {activeValue?.description ?? "Each value has a short explanation to help you choose from instinct and clarity."}
+        </p>
+      </motion.div>
 
       <div className="grid grid-cols-4 gap-2 pb-24">
         {stepValues.map((value, index) => (
