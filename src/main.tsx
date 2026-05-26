@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
-import { Check, Copy, GripVertical, Heart, Plus, RotateCcw, Share2, Sparkles } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Copy, GripVertical, Heart, Plus, RotateCcw, Share2, Sparkles } from "lucide-react";
 import "./styles.css";
 
 type Value = {
@@ -13,48 +13,33 @@ type Step = 1 | 2 | 3 | 4;
 type ShareStatus = "idle" | "shared" | "copied" | "saved";
 
 const baseValues: Value[] = [
-  { title: "Personal Freedom", description: "Autonomy, independence, and self-direction" },
-  { title: "Inner Stability", description: "Emotional steadiness, calm, and reliability" },
-  { title: "Practicality", description: "Clear judgment, usefulness, and real-world sense" },
-  { title: "Efficiency", description: "Reducing waste and moving with purpose" },
-  { title: "Ambition", description: "Drive to build and achieve" },
-  { title: "Wisdom", description: "Judgment, perspective, and emotional steadiness" },
-  { title: "Intellectual Curiosity", description: "Desire to learn and explore deeply" },
-  { title: "Creative Expression", description: "Imagination, originality, and artistic instinct" },
-  { title: "Self-Discipline", description: "Consistency and self-mastery" },
-  { title: "Authentic Living", description: "Being real instead of performative" },
-  { title: "Sense of Purpose", description: "Living with meaning and direction" },
-  { title: "Spiritual Connection", description: "Connection to something greater than yourself" },
-  { title: "Long-Term Commitment", description: "Choosing someone repeatedly over time" },
-  { title: "Life Partnership", description: "Building and navigating life as a team" },
-  { title: "Loyalty", description: "Commitment through difficulty" },
-  { title: "Trust", description: "Safety, honesty, and reliability" },
-  { title: "Kindness", description: "Warmth shown consistently in ordinary moments" },
-  { title: "Affection", description: "Physical and emotional warmth, care, and closeness" },
-  { title: "Patience", description: "Calm through imperfection and delay" },
-  { title: "Chemistry", description: "Magnetic attraction and tension" },
-  { title: "Deep Friendship", description: "Trust, companionship, and mutual liking" },
-  { title: "Romantic Playfulness", description: "Teasing, flirting, and spontaneity" },
-  { title: "Shared Humor", description: "Playful wit and laughter together" },
-  { title: "Honesty", description: "Openness, candor, and willingness to be direct" },
-  { title: "Deep Devotion", description: "Steady commitment through changing seasons" },
-  { title: "Family Bonds", description: "Strong family ties and future legacy" },
-  { title: "Raising Children", description: "Guiding and shaping the next generation" },
-  { title: "Sense of Home", description: "Creating a warm, private world together" },
-  { title: "Everyday Domestic Life", description: "Building ordinary life together well" },
-  { title: "Shared Rituals", description: "Traditions, rhythms, and recurring moments together" },
-  { title: "Sense of Community", description: "Belonging within a tribe or network" },
-  { title: "Shared Adventure", description: "Novelty, risk, and meaningful experiences" },
-  { title: "Financial Abundance", description: "Wealth, security, and life optionality" },
-  { title: "Refinement", description: "Appreciation for beauty, quality, and elegance" },
-  { title: "Physical Well-Being", description: "Vitality, energy, and long-term health" },
-  { title: "Life Balance", description: "Harmony between work, love, health, and rest" },
-  { title: "Lasting Legacy", description: "Building something that outlives you" },
-  { title: "Excitement", description: "Intensity, stimulation, and emotional highs" },
-  { title: "Comfort", description: "Ease, pleasure, and convenience" },
-  { title: "Aesthetic Living", description: "Beautiful spaces, experiences, and atmosphere" },
+  { title: "Health", description: "Physical vitality and long-term well-being" },
+  { title: "Freedom", description: "Autonomy and self-direction" },
+  { title: "Curiosity", description: "Desire to learn and explore" },
+  { title: "Capability", description: "Effectiveness, resilience, and problem-solving ability" },
+  { title: "Spiritual Life", description: "Connection to something greater" },
+  { title: "Self-Discipline", description: "Consistency and control over impulses and emotions" },
+  { title: "Value of Sex", description: "Viewing sex as meaningful and connective" },
+  { title: "Mature Love", description: "Love rooted in commitment and sacrifice" },
+  { title: "Social Connection", description: "Feeling connected to people, community, and culture" },
+  { title: "Adventure", description: "Desire for exploration and meaningful experiences" },
   { title: "Unity with Nature", description: "Feeling grounded and connected to the natural world" },
-  { title: "Prestige", description: "Recognition, exclusivity, and status" },
+  { title: "Efficiency", description: "Using time and energy wisely" },
+  { title: "Practicality", description: "Prioritizing what works in real life" },
+  { title: "Ambition", description: "Drive toward growth, achievement, and self-actualization" },
+  { title: "Emotional Stability", description: "Remaining calm and reliable under stress" },
+  { title: "Emotional Honesty", description: "Speaking truthfully about feelings and needs" },
+  { title: "Long-Term Partnership", description: "Building a meaningful life with one person" },
+  { title: "Rooted Family Life", description: "Finding meaning in family, home, and shared routines" },
+  { title: "Resilience", description: "Ability to endure hardship and adapt" },
+  { title: "Financial Abundance", description: "Creating security and optionality" },
+  { title: "Responsibility", description: "Taking ownership of obligations and consequences" },
+  { title: "Loyalty", description: "Remaining committed during difficult seasons" },
+  { title: "Spontaneity", description: "Preference for novelty, flexibility, and unplanned experiences" },
+  { title: "Comfort", description: "Preference for ease and low friction" },
+  { title: "Reinvention", description: "Desire for continuous transformation and change" },
+  { title: "Refinement", description: "Attraction to beauty, quality, status, and elevated experiences" },
+  { title: "Aesthetic Living", description: "Prioritizing beauty and atmosphere" },
 ];
 
 const rankLabels = ["Core Value", "Very Important", "Important", "Meaningful", "Still Matters"];
@@ -71,6 +56,11 @@ function App() {
   const selectedTen = values.filter((value) => firstPicks.includes(value.title));
   const rankedValues = ranking.map((title) => values.find((value) => value.title === title)).filter(Boolean) as Value[];
   const progress = step === 4 ? 100 : Math.round((step / 3) * 100);
+  const canGoBack = step > 1;
+  const canGoForward =
+    (step === 1 && firstPicks.length === 10) ||
+    (step === 2 && finalPicks.length === 5) ||
+    step === 3;
 
   React.useLayoutEffect(() => {
     const resetScroll = () => {
@@ -104,6 +94,28 @@ function App() {
   function goToRank() {
     setRanking(finalPicks);
     setStep(3);
+  }
+
+  function goBack() {
+    setStep((current) => Math.max(1, current - 1) as Step);
+  }
+
+  function goForward() {
+    if (!canGoForward) return;
+
+    if (step === 1) {
+      setStep(2);
+      return;
+    }
+
+    if (step === 2) {
+      goToRank();
+      return;
+    }
+
+    if (step === 3) {
+      setStep(4);
+    }
   }
 
   function restart() {
@@ -176,6 +188,25 @@ function App() {
               The Values Game
             </div>
             {(firstPicks.length > 0 || step > 1) && (
+              <div className="flex items-center gap-2">
+                <button
+                  className="grid h-10 w-10 place-items-center rounded-full bg-white/80 text-rosewood shadow-soft transition active:scale-95 disabled:cursor-not-allowed disabled:text-ink/20 disabled:shadow-none"
+                  onClick={goBack}
+                  disabled={!canGoBack}
+                  aria-label="Go back"
+                  title="Go back"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  className="grid h-10 w-10 place-items-center rounded-full bg-white/80 text-rosewood shadow-soft transition active:scale-95 disabled:cursor-not-allowed disabled:text-ink/20 disabled:shadow-none"
+                  onClick={goForward}
+                  disabled={!canGoForward}
+                  aria-label="Go forward"
+                  title="Go forward"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
               <button
                 className="grid h-10 w-10 place-items-center rounded-full bg-white/80 text-rosewood shadow-soft transition active:scale-95"
                 onClick={restart}
@@ -184,6 +215,7 @@ function App() {
               >
                 <RotateCcw className="h-4 w-4" />
               </button>
+              </div>
             )}
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-white shadow-inner">
@@ -332,7 +364,7 @@ function PickStep({
         key={activeValue?.title ?? "hint"}
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-3 z-10 mb-3 rounded-[1rem] border border-white/80 bg-white/92 p-3 shadow-lift backdrop-blur-xl"
+        className="fixed left-4 right-4 top-20 z-30 mx-auto max-w-md rounded-[1rem] border border-white/80 bg-white/95 p-3 shadow-lift backdrop-blur-xl"
       >
         <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-honey">
           {activeValue ? "What it means" : "Tap a card"}
@@ -345,7 +377,7 @@ function PickStep({
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-4 gap-2 pb-24">
+      <div className="grid grid-cols-4 gap-2 pb-24 pt-36">
         {stepValues.map((value, index) => (
           <ValueCard
             key={value.title}
