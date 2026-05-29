@@ -11,6 +11,26 @@ type Value = {
 
 type Step = 1 | 2 | 3 | 4;
 type ShareStatus = "idle" | "shared" | "copied" | "saved";
+type Theme =
+  | "freedom"
+  | "stability"
+  | "family"
+  | "growth"
+  | "adventure"
+  | "sensuality"
+  | "spirituality"
+  | "practicality"
+  | "status"
+  | "connection"
+  | "beauty"
+  | "custom";
+
+type ResultProfile = {
+  archetype: string;
+  summary: string;
+  observations: string[];
+  prompts: string[];
+};
 
 const baseValues: Value[] = [
   { title: "Health", description: "Physical vitality and long-term well-being" },
@@ -43,6 +63,36 @@ const baseValues: Value[] = [
 ];
 
 const rankLabels = ["Core Value", "Very Important", "Important", "Meaningful", "Still Matters"];
+
+const valueThemes: Record<string, Theme[]> = {
+  Health: ["stability", "practicality"],
+  Freedom: ["freedom"],
+  Curiosity: ["growth", "adventure"],
+  Capability: ["practicality", "growth"],
+  "Spiritual Life": ["spirituality", "stability"],
+  "Self-Discipline": ["practicality", "stability"],
+  "Value of Sex": ["sensuality", "connection"],
+  "Mature Love": ["connection", "family", "stability"],
+  "Social Connection": ["connection"],
+  Adventure: ["adventure", "freedom"],
+  "Unity with Nature": ["spirituality", "stability"],
+  Efficiency: ["practicality"],
+  Practicality: ["practicality", "stability"],
+  Ambition: ["growth", "status"],
+  "Emotional Stability": ["stability"],
+  "Emotional Honesty": ["connection", "stability"],
+  "Long-Term Partnership": ["connection", "family", "stability"],
+  "Rooted Family Life": ["family", "stability"],
+  Resilience: ["stability", "growth"],
+  "Financial Abundance": ["practicality", "status"],
+  Responsibility: ["practicality", "stability"],
+  Loyalty: ["connection", "stability"],
+  Spontaneity: ["adventure", "freedom"],
+  Comfort: ["stability"],
+  Reinvention: ["growth", "freedom"],
+  Refinement: ["beauty", "status"],
+  "Aesthetic Living": ["beauty", "stability"],
+};
 
 function App() {
   const [step, setStep] = React.useState<Step>(1);
@@ -139,8 +189,9 @@ function App() {
   }
 
   async function shareResults() {
-    const text = buildShareText(rankedValues);
-    const imageBlob = await createShareCardBlob(rankedValues);
+    const profile = buildResultProfile(rankedValues);
+    const text = buildShareText(rankedValues, profile);
+    const imageBlob = await createShareCardBlob(rankedValues, profile);
     const imageFile = new File([imageBlob], "the-values-game-results.png", { type: "image/png" });
     setShareStatus("idle");
 
@@ -576,7 +627,7 @@ function Results({
   onRestart: () => void;
   shareStatus: ShareStatus;
 }) {
-  const insights = buildInsights(rankedValues.map((value) => value.title));
+  const profile = buildResultProfile(rankedValues);
   const shareLabel =
     shareStatus === "shared"
       ? "Shared"
@@ -595,7 +646,8 @@ function Results({
     >
       <div className="mb-5">
         <h2 className="font-serif text-5xl leading-[0.95] text-rosewood">Your Love Compass</h2>
-        <p className="mt-3 text-sm leading-6 text-ink/62">{buildSummary(rankedValues)}</p>
+        <div className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-honey">{profile.archetype}</div>
+        <p className="mt-2 text-sm leading-6 text-ink/62">{profile.summary}</p>
       </div>
 
       <div className="rounded-[1.8rem] border border-white/90 bg-white p-5 shadow-lift">
@@ -621,7 +673,8 @@ function Results({
       </div>
 
       <div className="mt-4 space-y-3">
-        {insights.map((insight) => (
+        <div className="px-1 text-xs font-bold uppercase tracking-[0.18em] text-rosewood/60">Observations</div>
+        {profile.observations.map((insight) => (
           <motion.div
             key={insight}
             initial={{ opacity: 0, x: -8 }}
@@ -629,6 +682,20 @@ function Results({
             className="rounded-[1.25rem] border border-white/80 bg-white/72 p-4 text-sm leading-6 text-ink/68 shadow-soft"
           >
             {insight}
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="mt-4 space-y-3">
+        <div className="px-1 text-xs font-bold uppercase tracking-[0.18em] text-rosewood/60">Compare Over A Drink</div>
+        {profile.prompts.map((prompt) => (
+          <motion.div
+            key={prompt}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="rounded-[1.25rem] border border-white/80 bg-white/72 p-4 text-sm leading-6 text-ink/68 shadow-soft"
+          >
+            {prompt}
           </motion.div>
         ))}
       </div>
@@ -651,18 +718,19 @@ function Results({
         </button>
       </div>
 
-      <ShareCardPreview rankedValues={rankedValues} />
+      <ShareCardPreview rankedValues={rankedValues} profile={profile} />
     </motion.section>
   );
 }
 
-function ShareCardPreview({ rankedValues }: { rankedValues: Value[] }) {
+function ShareCardPreview({ rankedValues, profile }: { rankedValues: Value[]; profile: ResultProfile }) {
   return (
     <div className="mt-5 overflow-hidden rounded-[1.8rem] bg-[#2b2422] p-5 text-white shadow-lift">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <div className="text-xs font-bold uppercase tracking-[0.22em] text-blush">Share Card</div>
           <div className="mt-1 font-serif text-3xl">The Values Game</div>
+          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-honey">{profile.archetype}</div>
         </div>
         <Sparkles className="h-5 w-5 text-honey" />
       </div>
@@ -710,30 +778,127 @@ function ActionBar({
   );
 }
 
-function buildSummary(rankedValues: Value[]) {
-  const [first, second, third] = rankedValues;
-  if (!first || !second || !third) return "Your results are ready.";
-
-  return `You lead with ${first.title.toLowerCase()}, supported by ${second.title.toLowerCase()} and ${third.title.toLowerCase()}. In love, that points to someone who wants chemistry, choices, and daily life to line up in a way that feels honest.`;
-}
-
-function buildInsights(titles: string[]) {
+function buildResultProfile(rankedValues: Value[]): ResultProfile {
+  const titles = rankedValues.map((value) => value.title);
+  const [first, second] = rankedValues;
   const has = (title: string) => titles.includes(title);
-  const insights: string[] = [];
+  const hasAny = (...themes: Theme[]) =>
+    rankedValues.some((value) => getValueThemes(value.title).some((theme) => themes.includes(theme)));
+  const primaryHas = (...themes: Theme[]) =>
+    rankedValues.slice(0, 2).some((value) => getValueThemes(value.title).some((theme) => themes.includes(theme)));
+  const themeScores = scoreThemes(rankedValues);
+  const topTheme = Object.entries(themeScores).sort((a, b) => b[1] - a[1])[0]?.[0] as Theme | undefined;
 
-  if (has("Freedom")) insights.push("High Freedom suggests attraction grows when independence and trust can coexist.");
-  if (has("Kindness")) insights.push("Kindness near the top points to warmth, care, and emotional generosity.");
-  if (has("Ambition") || has("Growth")) insights.push("Ambition or Growth suggests you want a relationship that keeps becoming more alive.");
+  let archetype = "The Thoughtful Partner";
+  if (has("Practicality") && has("Efficiency") && has("Responsibility")) archetype = "The Practical Builder";
+  else if (has("Freedom") && (has("Adventure") || has("Spontaneity"))) archetype = "The Independent Explorer";
+  else if (has("Mature Love") && (has("Long-Term Partnership") || has("Loyalty"))) archetype = "The Devoted Partner";
+  else if (has("Rooted Family Life") && (has("Health") || has("Comfort"))) archetype = "The Grounded Homemaker";
+  else if (has("Value of Sex") && has("Mature Love") && has("Emotional Honesty")) archetype = "The Practical Romantic";
+  else if (primaryHas("family", "stability")) archetype = "The Grounded Builder";
+  else if (primaryHas("freedom", "adventure")) archetype = "The Independent Partner";
+  else if (primaryHas("connection", "sensuality")) archetype = "The Connected Romantic";
+  else if (primaryHas("growth", "status")) archetype = "The Ambitious Builder";
+  else if (primaryHas("spirituality")) archetype = "The Reflective Explorer";
 
-  return insights.slice(0, 4);
+  const summary =
+    first && second
+      ? `You seem oriented around ${first.title.toLowerCase()} and ${second.title.toLowerCase()}. That suggests you are not just choosing traits in a person; you are choosing the kind of daily life, pressure, and intimacy that would feel sustainable.`
+      : "Your results are ready.";
+
+  const observations = unique([
+    has("Practicality") || has("Efficiency") || has("Responsibility")
+      ? "You appear to respect relationships that work in real life, not only in theory. Daily habits, clear decisions, and low unnecessary friction may matter more than grand gestures."
+      : "",
+    has("Freedom") || has("Spontaneity") || has("Adventure")
+      ? "You likely need a relationship with room to breathe. Closeness matters, but it probably has to leave space for movement, choice, and aliveness."
+      : "",
+    has("Mature Love") || has("Long-Term Partnership") || has("Loyalty")
+      ? "You seem drawn toward love as a long-horizon decision. Attraction matters, but consistency through ordinary seasons may be what makes it feel serious."
+      : "",
+    has("Rooted Family Life")
+      ? "Home and family may not be background details for you. They look more like the center of what a good life is supposed to protect."
+      : "",
+    has("Value of Sex")
+      ? "Sex appears to mean more than novelty or release here. In your hierarchy, physical chemistry may need to feel connected to trust, meaning, and affection."
+      : "",
+    has("Emotional Stability") || has("Resilience")
+      ? "You may be especially sensitive to how someone handles pressure. Calm, recovery, and steadiness are likely part of what makes a partner feel safe to build with."
+      : "",
+    has("Ambition") || has("Financial Abundance") || has("Refinement")
+      ? "You seem to want life to keep rising in quality. That may show up as ambition, taste, security, or a desire to build something visibly better over time."
+      : "",
+    has("Spiritual Life") || has("Unity with Nature")
+      ? "There is a reflective current in these choices. A relationship may feel incomplete if it never touches meaning, gratitude, nature, or something larger than the two of you."
+      : "",
+    topTheme === "connection"
+      ? "Connection is doing a lot of work in your top five. You may care less about performing romance and more about whether two people can actually meet each other honestly."
+      : "",
+  ]).slice(0, 3);
+
+  const fallbackObservations = [
+    "Your top values point toward a relationship that has to make sense both emotionally and practically.",
+    "You seem less interested in a perfect checklist and more interested in a life that would feel steady, alive, and worth building.",
+  ];
+
+  const prompts = unique([
+    hasAny("practicality")
+      ? "Where should a relationship be efficient and practical, and where should it stay spacious or unoptimized?"
+      : "",
+    hasAny("freedom", "adventure")
+      ? "How much independence do you both need before closeness starts to feel like pressure?"
+      : "",
+    hasAny("family")
+      ? "What does a good home life actually look like day to day, not just someday?"
+      : "",
+    hasAny("connection", "sensuality")
+      ? "What makes intimacy feel meaningful rather than temporary?"
+      : "",
+    hasAny("growth", "status")
+      ? "What are you both trying to build, and what would you refuse to sacrifice to get there?"
+      : "",
+    hasAny("spirituality")
+      ? "What gives your life meaning when things are not exciting or easy?"
+      : "",
+  ]).slice(0, 2);
+
+  return {
+    archetype,
+    summary,
+    observations: observations.length ? observations : fallbackObservations,
+    prompts: prompts.length
+      ? prompts
+      : [
+          "Which of these values would change your day-to-day choices the most?",
+          "Where do our top values naturally overlap, and where would they ask for patience?",
+        ],
+  };
 }
 
-function buildShareText(rankedValues: Value[]) {
+function getValueThemes(title: string): Theme[] {
+  return valueThemes[title] ?? ["custom"];
+}
+
+function scoreThemes(rankedValues: Value[]) {
+  const weights = [4, 3, 2, 1, 1];
+  return rankedValues.reduce<Record<string, number>>((scores, value, index) => {
+    getValueThemes(value.title).forEach((theme) => {
+      scores[theme] = (scores[theme] ?? 0) + (weights[index] ?? 1);
+    });
+    return scores;
+  }, {});
+}
+
+function unique(items: string[]) {
+  return Array.from(new Set(items.filter(Boolean)));
+}
+
+function buildShareText(rankedValues: Value[], profile: ResultProfile) {
   const lines = rankedValues.map((value, index) => `${index + 1}. ${value.title} - ${rankLabels[index]}`);
-  return `My Values Game results:\n\n${lines.join("\n")}\n\n${buildSummary(rankedValues)}`;
+  return `My Values Game results:\n\n${profile.archetype}\n${profile.summary}\n\n${lines.join("\n")}\n\nQuestions worth comparing:\n${profile.prompts.join("\n")}`;
 }
 
-async function createShareCardBlob(rankedValues: Value[]) {
+async function createShareCardBlob(rankedValues: Value[], profile: ResultProfile) {
   await document.fonts?.ready;
 
   const canvas = document.createElement("canvas");
@@ -770,12 +935,16 @@ async function createShareCardBlob(rankedValues: Value[]) {
 
   ctx.fillStyle = "#fffaf3";
   ctx.font = "600 92px Georgia, serif";
-  ctx.fillText("My Love", 126, 278);
-  ctx.fillText("Compass", 126, 378);
+  ctx.fillText("My Love", 126, 266);
+  ctx.fillText("Compass", 126, 366);
+
+  ctx.fillStyle = "#c99454";
+  ctx.font = "800 26px Inter, system-ui, sans-serif";
+  ctx.fillText(profile.archetype.toUpperCase(), 126, 424);
 
   ctx.fillStyle = "rgba(255, 250, 243, 0.74)";
-  ctx.font = "400 34px Inter, system-ui, sans-serif";
-  wrapText(ctx, buildSummary(rankedValues), 126, 454, 780, 48, 3);
+  ctx.font = "400 30px Inter, system-ui, sans-serif";
+  wrapText(ctx, profile.summary, 126, 482, 780, 42, 3);
 
   rankedValues.forEach((value, index) => {
     const y = 626 + index * 126;
