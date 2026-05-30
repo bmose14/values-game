@@ -11,26 +11,6 @@ type Value = {
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
 type ShareStatus = "idle" | "shared" | "copied" | "saved";
-type Theme =
-  | "freedom"
-  | "stability"
-  | "family"
-  | "growth"
-  | "adventure"
-  | "pleasure"
-  | "sensuality"
-  | "spirituality"
-  | "practicality"
-  | "status"
-  | "connection"
-  | "beauty"
-  | "custom";
-
-type ResultProfile = {
-  archetype: string;
-  summary: string;
-  prompts: string[];
-};
 
 const baseValues: Value[] = [
   { title: "INNER HARMONY", description: "Feeling calm, centered, and at peace within yourself" },
@@ -93,75 +73,17 @@ const baseValues: Value[] = [
 
 const rankLabels = ["Core Value", "Very Important", "Important", "Meaningful", "Still Matters"];
 
-const valueThemes: Record<string, Theme[]> = {
-  "INNER HARMONY": ["spirituality", "stability"],
-  EQUALITY: ["connection", "stability"],
-  "SOCIAL POWER": ["status", "growth"],
-  PLEASURE: ["sensuality", "connection"],
-  FREEDOM: ["freedom"],
-  "SPIRITUAL LIFE": ["spirituality", "stability"],
-  "SENSE OF BELONGING": ["connection", "family"],
-  "SOCIAL ORDER": ["stability", "practicality"],
-  "FULFILLMENT OF LIFE": ["spirituality", "growth"],
-  "MEANING OF LIFE": ["spirituality", "growth"],
-  KINDNESS: ["connection", "stability"],
-  WEALTH: ["practicality", "status"],
-  "NATIONAL SECURITY": ["stability", "status"],
-  "SELF-RESPECT": ["stability", "connection"],
-  SUCCESS: ["growth", "status"],
-  CREATIVITY: ["growth", "beauty"],
-  "PEACE IN THE WORLD": ["spirituality", "connection"],
-  "RESPECT FOR TRADITIONS": ["stability", "family"],
-  "MATURE LOVE": ["connection", "family", "stability"],
-  "SELF-DISCIPLINE": ["practicality", "stability"],
-  CONFIDENTIALITY: ["stability", "connection"],
-  "FAMILY SAFETY": ["family", "stability"],
-  "SOCIAL RECOGNITION": ["status", "connection"],
-  "UNITY WITH NATURE": ["spirituality", "stability"],
-  "DIVERSITY OF LIFE": ["growth", "adventure"],
-  WISDOM: ["stability", "growth"],
-  EMPOWERMENT: ["freedom", "status"],
-  "TRUE FRIENDSHIP": ["connection", "family"],
-  "WORLD OF BEAUTY": ["beauty", "status"],
-  "SOCIAL JUSTICE": ["connection", "spirituality"],
-  INDEPENDENCE: ["freedom"],
-  "SELF-CONTROL": ["practicality", "stability"],
-  "VALUE OF SEX": ["sensuality", "connection"],
-  AMBITIOUSNESS: ["growth", "status"],
-  TOLERANCE: ["connection", "stability"],
-  MODESTY: ["stability", "family"],
-  "THIRST FOR ADVENTURE": ["adventure", "freedom"],
-  "PROTECTION OF THE ENVIRONMENT": ["spirituality", "stability"],
-  INFLUENCE: ["status", "growth"],
-  "RESPECT FOR PARENTS AND ELDERLY PEOPLE": ["family", "stability"],
-  "CHOOSING MY OWN GOALS": ["freedom", "growth"],
-  HEALTH: ["stability", "practicality"],
-  COMPETENCE: ["practicality", "growth"],
-  "ACCEPTING ALL SIDES OF LIFE": ["spirituality", "stability"],
-  HONESTY: ["connection", "stability"],
-  REPUTATION: ["status", "stability"],
-  "BEING HEARD": ["connection", "status"],
-  INTELLECT: ["growth", "practicality"],
-  "ENJOYMENT OF LIFE": ["pleasure", "connection"],
-  USEFULNESS: ["practicality", "connection"],
-  FAITH: ["spirituality", "stability"],
-  RESPONSIBILITY: ["practicality", "stability"],
-  CURIOSITY: ["growth", "adventure"],
-  FORGIVENESS: ["connection", "stability"],
-  CLEANLINESS: ["practicality", "stability"],
-  "SELF-EVALUATION": ["growth", "stability"],
-};
-
 function App() {
   const [step, setStep] = React.useState<Step>(1);
   const [firstPicks, setFirstPicks] = React.useState<string[]>([]);
   const [secondPicks, setSecondPicks] = React.useState<string[]>([]);
   const [topTenPicks, setTopTenPicks] = React.useState<string[]>([]);
+  const [hiddenFirst, setHiddenFirst] = React.useState<string[]>([]);
+  const [hiddenSecond, setHiddenSecond] = React.useState<string[]>([]);
   const [finalPicks, setFinalPicks] = React.useState<string[]>([]);
   const [ranking, setRanking] = React.useState<string[]>([]);
   const [shareStatus, setShareStatus] = React.useState<ShareStatus>("idle");
   const [customValues, setCustomValues] = React.useState<Value[]>([]);
-  const [hiddenFirst, setHiddenFirst] = React.useState<string[]>([]);
 
   const values = React.useMemo(() => [...baseValues, ...customValues], [customValues]);
   const splitIndex = Math.ceil(baseValues.length / 2);
@@ -204,9 +126,13 @@ function App() {
   }
 
   function toggleHiddenFirst(title: string) {
-    setHiddenFirst((current) =>
-      current.includes(title) ? current.filter((item) => item !== title) : [...current, title]
-    );
+    setHiddenFirst((current) => {
+      const isHidden = current.includes(title);
+      if (isHidden) return current.filter((item) => item !== title);
+      return [...current, title];
+    });
+
+    setFirstPicks((current) => current.filter((item) => item !== title));
   }
 
   function toggleSecond(title: string) {
@@ -215,6 +141,16 @@ function App() {
       if (current.length >= 10) return current;
       return [...current, title];
     });
+  }
+
+  function toggleHiddenSecond(title: string) {
+    setHiddenSecond((current) => {
+      const isHidden = current.includes(title);
+      if (isHidden) return current.filter((item) => item !== title);
+      return [...current, title];
+    });
+
+    setSecondPicks((current) => current.filter((item) => item !== title));
   }
 
   function toggleTopTen(title: string) {
@@ -241,8 +177,10 @@ function App() {
   function goBack() {
     setStep((current) => {
       const next = Math.max(1, current - 1) as Step;
+
       if (current === 2) {
         setSecondPicks([]);
+        setHiddenSecond([]);
         setTopTenPicks([]);
         setFinalPicks([]);
         setRanking([]);
@@ -256,6 +194,7 @@ function App() {
       } else if (current === 5) {
         setRanking([]);
       }
+
       return next;
     });
   }
@@ -293,10 +232,11 @@ function App() {
     setFirstPicks([]);
     setSecondPicks([]);
     setTopTenPicks([]);
+    setHiddenFirst([]);
+    setHiddenSecond([]);
     setFinalPicks([]);
     setRanking([]);
     setShareStatus("idle");
-    setHiddenFirst([]);
   }
 
   function addCustomValue(title: string) {
@@ -312,9 +252,8 @@ function App() {
   }
 
   async function shareResults() {
-    const profile = buildResultProfile(rankedValues);
-    const text = buildShareText(rankedValues, profile);
-    const imageBlob = await createShareCardBlob(rankedValues, profile);
+    const text = buildShareText(rankedValues);
+    const imageBlob = await createShareCardBlob(rankedValues);
     const imageFile = new File([imageBlob], "the-values-game-results.png", { type: "image/png" });
     setShareStatus("idle");
 
@@ -354,14 +293,14 @@ function App() {
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-linen text-ink">
-      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-44 pt-5 sm:max-w-xl">
+      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-36 pt-5 sm:max-w-xl">
         <header className="mb-5">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-rosewood/70">
               <Heart className="h-4 w-4 fill-blush text-rosewood" />
               The Values Game
             </div>
-            {(firstPicks.length > 0 || step > 1 || hiddenFirst.length > 0) && (
+            {(firstPicks.length > 0 || step > 1) && (
               <div className="flex items-center gap-2">
                 <button
                   className="grid h-10 w-10 place-items-center rounded-full bg-white/80 text-rosewood shadow-soft transition active:scale-95 disabled:cursor-not-allowed disabled:text-ink/20 disabled:shadow-none"
@@ -406,33 +345,31 @@ function App() {
             <PickStep
               key="step-1"
               title="Pick 10"
-              text="Choose the 10 qualities that matter most to you from this first half, in no particular order."
+              text="Choose the 10 qualities that matter most to you, in no particular order."
               roundLabel="Round 1 of 5"
-              progressLabel="Pick 10"
               intro
               values={firstRoundValues}
               selected={firstPicks}
               target={10}
-              stepProgress={Math.round((firstPicks.length / 10) * 100)}
               onToggle={toggleFirst}
+              hidden={hiddenFirst}
+              onToggleHidden={toggleHiddenFirst}
               onContinue={() => setStep(2)}
               onAddCustom={addCustomValue}
-              hiddenTitles={hiddenFirst}
-              onToggleHidden={toggleHiddenFirst}
             />
           )}
           {step === 2 && (
             <PickStep
               key="step-2"
               title="Pick 10"
-              text="Now choose the 10 qualities that matter most to you from the second half, in no particular order."
+              text="Choose 10 more from the second half of the deck."
               roundLabel="Round 2 of 5"
-              progressLabel="Pick 10"
               values={secondRoundValues}
               selected={secondPicks}
               target={10}
-              stepProgress={Math.round((secondPicks.length / 10) * 100)}
               onToggle={toggleSecond}
+              hidden={hiddenSecond}
+              onToggleHidden={toggleHiddenSecond}
               onContinue={() => setStep(3)}
             />
           )}
@@ -440,13 +377,11 @@ function App() {
             <PickStep
               key="step-3"
               title="Narrow to 10"
-              text="Now choose the 10 you couldn't live without from the 20 you picked."
+              text="From your 20 picks, keep the 10 that matter most."
               roundLabel="Round 3 of 5"
-              progressLabel="Narrow to 10"
               values={selectedTwenty}
               selected={topTenPicks}
               target={10}
-              stepProgress={Math.round((topTenPicks.length / 10) * 100)}
               onToggle={toggleTopTen}
               onContinue={() => setStep(4)}
             />
@@ -457,11 +392,9 @@ function App() {
               title="Narrow to 5"
               text="Now choose the 5 you couldn't live without."
               roundLabel="Round 4 of 5"
-              progressLabel="Narrow to 5"
               values={selectedTen}
               selected={finalPicks}
               target={5}
-              stepProgress={Math.round((finalPicks.length / 5) * 100)}
               onToggle={toggleFinal}
               onContinue={goToRank}
             />
@@ -486,7 +419,7 @@ function App() {
             />
           )}
         </AnimatePresence>
-        <footer className="mt-auto pb-36 pt-8 text-center text-[11px] leading-5 text-ink/45">
+        <footer className="mt-auto border-t border-white/65 pb-40 pt-6 text-center text-[11px] leading-5 text-ink/55">
           Developed by Brian Moseley · May 2026 · For feedback email{" "}
           <a className="font-semibold text-rosewood/70" href="mailto:bmose14@gmail.com">
             bmose14@gmail.com
@@ -501,44 +434,57 @@ function PickStep({
   title,
   text,
   roundLabel,
-  progressLabel,
   intro = false,
   values: stepValues,
   selected,
   target,
-  stepProgress,
   onToggle,
+  hidden,
+  onToggleHidden,
   onContinue,
   onAddCustom,
-  hiddenTitles = [],
-  onToggleHidden,
 }: {
   title: string;
   text: string;
   roundLabel: string;
-  progressLabel: string;
   intro?: boolean;
   values: Value[];
   selected: string[];
   target: number;
-  stepProgress: number;
   onToggle: (title: string) => void;
+  hidden?: string[];
+  onToggleHidden?: (title: string) => void;
   onContinue: () => void;
   onAddCustom?: (title: string) => boolean;
-  hiddenTitles?: string[];
-  onToggleHidden?: (title: string) => void;
 }) {
   const canContinue = selected.length === target;
   const left = Math.max(target - selected.length, 0);
+  const progress = target ? (selected.length / target) * 100 : 0;
   const [activeValue, setActiveValue] = React.useState<Value | null>(null);
+  const [showExplainer, setShowExplainer] = React.useState(false);
+  const scrollAnchorRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     setActiveValue((current) => {
-      if (selected.length === 0) return null;
       if (current && stepValues.some((value) => value.title === current.title)) return current;
       return null;
     });
-  }, [selected.length, stepValues]);
+  }, [stepValues]);
+
+  React.useEffect(() => {
+    const anchor = scrollAnchorRef.current;
+    if (!anchor) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowExplainer(!entry.isIntersecting);
+      },
+      { threshold: 0.01 },
+    );
+
+    observer.observe(anchor);
+    return () => observer.disconnect();
+  }, []);
 
   function handleToggle(value: Value) {
     setActiveValue(value);
@@ -574,56 +520,63 @@ function PickStep({
           <p className="mt-1 text-xs leading-5 text-ink/62">{text}</p>
         </div>
         <div className="shrink-0 rounded-2xl bg-rosewood px-3 py-2 text-right text-[11px] font-bold leading-4 text-white shadow-soft">
-          <div>{selected.length} picked</div>
-          <div className="text-white/78">{left} left</div>
+          <div>{selected.length} selected</div>
+          <div className="text-white/72">{left} left</div>
         </div>
       </div>
 
-      {activeValue && selected.length > 0 && (
-        <motion.div
-          key={activeValue.title}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="pointer-events-none sticky top-4 z-20 mx-auto mb-3 max-w-md rounded-[1rem] border border-white/80 bg-white/95 p-3 shadow-lift backdrop-blur-xl"
-        >
-          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-honey">What it means</div>
-          <div className="mt-1 font-serif text-xl leading-5 text-ink">{activeValue.title}</div>
-          <p className="mt-1 text-xs leading-5 text-ink/62">{activeValue.description}</p>
-        </motion.div>
-      )}
+      <div ref={scrollAnchorRef} className="h-px w-full" aria-hidden="true" />
 
-      <div className="grid grid-cols-4 gap-2 pb-60 pt-4">
+      <AnimatePresence>
+        {showExplainer && (
+          <motion.div
+            key={activeValue?.title ?? "hint"}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            className="fixed left-4 right-4 top-24 z-30 mx-auto max-w-md rounded-[1rem] border border-white/80 bg-white/95 p-3 shadow-lift backdrop-blur-xl sm:max-w-xl"
+          >
+            <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-honey">
+              {activeValue ? "What it means" : "Tap a card"}
+            </div>
+            <div className="mt-1 font-serif text-xl leading-5 text-ink">
+              {activeValue?.title ?? "See the meaning before you decide"}
+            </div>
+            <p className="mt-1 text-xs leading-5 text-ink/62">
+              {activeValue?.description ?? "Each value has a short explanation to help you choose from instinct and clarity."}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="grid grid-cols-4 gap-2 pb-24 pt-10">
         {stepValues.map((value, index) => (
           <ValueCard
             key={value.title}
             value={value}
             selected={selected.includes(value.title)}
-            hidden={hiddenTitles.includes(value.title)}
+            hidden={hidden?.includes(value.title) ?? false}
             onToggle={handleToggle}
-            onToggleHidden={onToggleHidden ? () => onToggleHidden(value.title) : undefined}
-            canHide={!selected.includes(value.title) && Boolean(onToggleHidden)}
+            onToggleHidden={onToggleHidden}
             index={index}
           />
         ))}
         {onAddCustom && <AddValueCard onAdd={onAddCustom} />}
       </div>
 
-      <div className="pointer-events-none fixed inset-x-4 bottom-[5.5rem] z-10 mx-auto max-w-md rounded-[1.15rem] border border-white/85 bg-white/95 px-4 py-3 shadow-lift backdrop-blur-xl">
-        <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-rosewood/68">
-          <span>{progressLabel}</span>
+      <div className="fixed inset-x-4 bottom-[5.1rem] z-10 mx-auto max-w-md rounded-[1rem] border border-white/80 bg-white/88 px-3 py-2 shadow-soft backdrop-blur-xl sm:max-w-xl">
+        <div className="mb-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-rosewood/62">
+          <span>{left} left to pick</span>
           <span>
             {selected.length}/{target}
           </span>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-[#f4e9e2]">
+        <div className="h-1.5 overflow-hidden rounded-full bg-rosewood/10">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-rosewood via-[#b06a61] to-sage"
-            animate={{ width: `${Math.min(stepProgress, 100)}%` }}
-            transition={{ type: "spring", stiffness: 120, damping: 18 }}
+            className="h-full rounded-full bg-gradient-to-r from-rosewood via-honey to-sage"
+            animate={{ width: `${progress}%` }}
+            transition={{ type: "spring", stiffness: 100, damping: 20 }}
           />
-        </div>
-        <div className="mt-2 text-[11px] leading-4 text-ink/58">
-          {selected.length === target ? "You’re ready to continue." : `${left} more to go.`}
         </div>
       </div>
 
@@ -642,20 +595,18 @@ function ValueCard({
   hidden,
   onToggle,
   onToggleHidden,
-  canHide = false,
   index,
 }: {
   value: Value;
   selected: boolean;
   hidden: boolean;
   onToggle: (value: Value) => void;
-  onToggleHidden?: () => void;
-  canHide?: boolean;
+  onToggleHidden?: (title: string) => void;
   index: number;
 }) {
   function handleClick() {
     if (hidden) {
-      onToggleHidden?.();
+      onToggleHidden?.(value.title);
       return;
     }
 
@@ -671,11 +622,11 @@ function ValueCard({
         transition={{ delay: Math.min(index * 0.018, 0.25), type: "spring", stiffness: 120, damping: 16 }}
         whileTap={{ scale: 0.985 }}
         onClick={handleClick}
-        className={`group relative flex aspect-[0.94] w-full items-center justify-center overflow-hidden rounded-[1rem] border px-1.5 py-2 text-center shadow-soft transition ${
+        className={`group relative flex aspect-[0.94] w-full items-center justify-center rounded-[1rem] border px-1.5 py-2 text-center shadow-soft transition ${
           hidden
             ? "border-ink/10 bg-[#4b3d38] shadow-lift"
             : selected
-              ? "border-rosewood/70 bg-[#fff4ef] shadow-lift ring-1 ring-rosewood/10"
+              ? "border-rosewood/55 bg-[#fff4ef] shadow-lift"
               : "border-white/90 bg-white/82 hover:border-blush hover:bg-white"
         }`}
         style={{ transformStyle: "preserve-3d" }}
@@ -687,7 +638,7 @@ function ValueCard({
         >
           <span
             className={`break-words font-serif text-[clamp(0.66rem,2.6vw,0.92rem)] font-semibold leading-[1.05] ${
-              hidden ? "text-white/92" : selected ? "text-rosewood" : "text-ink"
+              hidden ? "text-white/92" : "text-ink"
             }`}
           >
             {value.title}
@@ -706,8 +657,8 @@ function ValueCard({
 
         {!hidden && (
           <span
-            className={`pointer-events-none absolute right-1 top-1 grid h-4 w-4 shrink-0 place-items-center rounded-full border transition ${
-              selected ? "border-rosewood bg-rosewood text-white shadow-sm" : "border-ink/12 bg-linen text-transparent"
+            className={`absolute right-1 top-1 grid h-4 w-4 shrink-0 place-items-center rounded-full border transition ${
+              selected ? "border-rosewood bg-rosewood text-white" : "border-ink/12 bg-linen text-transparent"
             }`}
           >
             <Check className="h-2.5 w-2.5" />
@@ -715,16 +666,16 @@ function ValueCard({
         )}
       </motion.button>
 
-      {!hidden && canHide && onToggleHidden && (
+      {!hidden && onToggleHidden && (
         <button
           type="button"
+          className="absolute left-1 top-1 z-10 grid h-5 w-5 place-items-center rounded-full border border-ink/10 bg-white/90 text-ink/55 shadow-sm transition active:scale-95"
           onClick={(event) => {
             event.stopPropagation();
-            onToggleHidden();
+            onToggleHidden(value.title);
           }}
-          className="absolute left-1 top-1 z-10 grid h-5 w-5 place-items-center rounded-full border border-ink/12 bg-white/90 text-ink/42 transition hover:text-rosewood"
-          title="Hide this card"
           aria-label={`Hide ${value.title}`}
+          title={`Hide ${value.title}`}
         >
           <EyeOff className="h-3 w-3" />
         </button>
@@ -757,7 +708,7 @@ function AddValueCard({ onAdd }: { onAdd: (title: string) => boolean }) {
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         onSubmit={submit}
-        className="col-span-4 grid grid-cols-[1fr_auto] gap-2 rounded-[1rem] border border-rosewood/25 bg-white/88 p-2 shadow-soft"
+        className="col-span-5 grid grid-cols-[1fr_auto] gap-2 rounded-[1rem] border border-rosewood/25 bg-white/88 p-2 shadow-soft"
       >
         <div>
           <input
@@ -844,7 +795,7 @@ function RankStep({
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-xs font-bold uppercase tracking-[0.16em] text-honey">{rankLabels[index]}</div>
-                  <div className="mt-1 font-serif text-2xl leading-6">{prettyTitle(value.title)}</div>
+                  <div className="mt-1 font-serif text-2xl leading-6">{value.title}</div>
                   <div className="mt-1 text-sm leading-5 text-ink/55">{value.description}</div>
                 </div>
                 <GripVertical className="h-5 w-5 shrink-0 text-ink/24" />
@@ -870,7 +821,7 @@ function Results({
   onRestart: () => void;
   shareStatus: ShareStatus;
 }) {
-  const profile = buildResultProfile(rankedValues);
+  const insights = buildInsights(rankedValues.map((value) => value.title));
   const shareLabel =
     shareStatus === "shared"
       ? "Shared"
@@ -889,8 +840,7 @@ function Results({
     >
       <div className="mb-5">
         <h2 className="font-serif text-5xl leading-[0.95] text-rosewood">Your Values Profile</h2>
-        <div className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-honey">{profile.archetype}</div>
-        <p className="mt-2 text-sm leading-6 text-ink/62">{profile.summary}</p>
+        <p className="mt-3 text-sm leading-6 text-ink/62">{buildSummary(rankedValues)}</p>
       </div>
 
       <div className="rounded-[1.8rem] border border-white/90 bg-white p-5 shadow-lift">
@@ -907,12 +857,25 @@ function Results({
               </div>
               <div>
                 <div className="text-xs font-bold uppercase tracking-[0.15em] text-honey">{rankLabels[index]}</div>
-                <div className="mt-0.5 font-serif text-2xl leading-6">{prettyTitle(value.title)}</div>
+                <div className="mt-0.5 font-serif text-2xl leading-6">{value.title}</div>
                 <div className="mt-1 text-sm leading-5 text-ink/57">{value.description}</div>
               </div>
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="mt-4 space-y-3">
+        {insights.map((insight) => (
+          <motion.div
+            key={insight}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="rounded-[1.25rem] border border-white/80 bg-white/72 p-4 text-sm leading-6 text-ink/68 shadow-soft"
+          >
+            {insight}
+          </motion.div>
+        ))}
       </div>
 
       <div className="mt-5 grid grid-cols-[1fr_auto] gap-3">
@@ -933,28 +896,25 @@ function Results({
         </button>
       </div>
 
-      <ShareCardPreview rankedValues={rankedValues} profile={profile} />
+      <ShareCardPreview rankedValues={rankedValues} />
     </motion.section>
   );
 }
 
-function ShareCardPreview({ rankedValues, profile }: { rankedValues: Value[]; profile: ResultProfile }) {
+function ShareCardPreview({ rankedValues }: { rankedValues: Value[] }) {
   return (
     <div className="mt-5 overflow-hidden rounded-[1.8rem] bg-[#2b2422] p-5 text-white shadow-lift">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <div className="text-xs font-bold uppercase tracking-[0.22em] text-blush">Share Card</div>
           <div className="mt-1 font-serif text-3xl">The Values Game</div>
-          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-honey">{profile.archetype}</div>
         </div>
         <Sparkles className="h-5 w-5 text-honey" />
       </div>
       <div className="space-y-2">
         {rankedValues.map((value, index) => (
           <div key={value.title} className="flex items-center justify-between rounded-2xl bg-white/9 px-3 py-2">
-            <span className="font-serif text-xl">
-              {index + 1}. {prettyTitle(value.title)}
-            </span>
+            <span className="font-serif text-xl">{index + 1}. {value.title}</span>
             <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/54">{rankLabels[index]}</span>
           </div>
         ))}
@@ -981,12 +941,12 @@ function ActionBar({
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-10 border-t border-white/80 bg-linen/96 px-4 py-4 backdrop-blur-xl">
+    <div className="fixed inset-x-0 bottom-0 z-10 border-t border-white/80 bg-linen/88 px-4 py-4 backdrop-blur-xl">
       <div className="mx-auto max-w-md sm:max-w-xl">
         <button
           disabled={disabled}
           onClick={handleClick}
-          className="h-14 w-full rounded-full bg-rosewood px-5 font-semibold text-white shadow-lift transition active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink/18 disabled:text-ink/45 disabled:shadow-none"
+          className="h-14 w-full rounded-full bg-rosewood px-5 font-semibold text-white shadow-lift transition active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink/18 disabled:text-ink/40 disabled:shadow-none"
         >
           {label}
         </button>
@@ -995,110 +955,30 @@ function ActionBar({
   );
 }
 
-function buildResultProfile(rankedValues: Value[]): ResultProfile {
-  const titles = rankedValues.map((value) => value.title);
-  const [first, second] = rankedValues;
+function buildSummary(rankedValues: Value[]) {
+  const [first, second, third] = rankedValues;
+  if (!first || !second || !third) return "Your results are ready.";
+
+  return `You lead with ${first.title.toLowerCase()}, supported by ${second.title.toLowerCase()} and ${third.title.toLowerCase()}. In partnership, that points to someone who wants chemistry, choices, and daily life to line up in a way that feels honest.`;
+}
+
+function buildInsights(titles: string[]) {
   const has = (title: string) => titles.includes(title);
-  const hasAny = (...themes: Theme[]) =>
-    rankedValues.some((value) => getValueThemes(value.title).some((theme) => themes.includes(theme)));
-  const primaryHas = (...themes: Theme[]) =>
-    rankedValues.slice(0, 2).some((value) => getValueThemes(value.title).some((theme) => themes.includes(theme)));
+  const insights: string[] = [];
 
-  let archetype = "The Considered Partner";
-  if (has("VALUE OF SEX") && (has("PLEASURE") || has("MATURE LOVE"))) archetype = "The Practical Romantic";
-  else if (has("FREEDOM") && (has("INDEPENDENCE") || has("CHOOSING MY OWN GOALS") || has("THIRST FOR ADVENTURE"))) {
-    archetype = "The Independent Explorer";
-  } else if (has("MATURE LOVE") && (has("TRUE FRIENDSHIP") || has("RESPONSIBILITY") || has("FORGIVENESS"))) {
-    archetype = "The Devoted Partner";
-  } else if (has("INNER HARMONY") && (has("SPIRITUAL LIFE") || has("UNITY WITH NATURE") || has("MEANING OF LIFE"))) {
-    archetype = "The Reflective Seeker";
-  } else if (has("WEALTH") && (has("SUCCESS") || has("SOCIAL POWER") || has("INFLUENCE"))) {
-    archetype = "The Capable Builder";
-  } else if (has("KINDNESS") && has("SENSE OF BELONGING")) {
-    archetype = "The Grounded Connector";
-  } else if (primaryHas("family", "stability")) {
-    archetype = "The Grounded Builder";
-  } else if (primaryHas("freedom", "adventure")) {
-    archetype = "The Independent Partner";
-  } else if (primaryHas("connection", "sensuality")) {
-    archetype = "The Connected Romantic";
-  } else if (primaryHas("growth", "status")) {
-    archetype = "The Ambitious Builder";
-  } else if (primaryHas("spirituality")) {
-    archetype = "The Reflective Explorer";
-  }
+  if (has("FREEDOM")) insights.push("High freedom suggests attraction grows when independence and trust can coexist.");
+  if (has("KINDNESS")) insights.push("Kindness near the top points to warmth, care, and real generosity.");
+  if (has("AMBITIOUSNESS") || has("SUCCESS")) insights.push("Ambitiousness or success suggests you want a relationship that keeps moving forward.");
 
-  const summary =
-    first && second
-      ? `Your top pair leans toward ${prettyTitle(first.title)} and ${prettyTitle(second.title)}. That usually points to the kind of daily life, intimacy, and responsibility you want a relationship to hold together.`
-      : "Your results are ready.";
-
-  const prompts = unique([
-    hasAny("practicality")
-      ? "Where should love be simple and practical, and where should it stay human and unoptimized?"
-      : "",
-    hasAny("freedom", "adventure")
-      ? "How much independence do you each need before closeness starts to feel crowded?"
-      : "",
-    hasAny("family")
-      ? "What does a good home life actually look like day to day, not just someday?"
-      : "",
-    hasAny("connection", "sensuality")
-      ? "What makes intimacy feel meaningful instead of just exciting?"
-      : "",
-    hasAny("growth", "status")
-      ? "What are you trying to build together, and what would you refuse to trade to get it?"
-      : "",
-    hasAny("spirituality")
-      ? "What gives your life meaning when things are calm, ordinary, or hard?"
-      : "",
-  ]).slice(0, 2);
-
-  return {
-    archetype,
-    summary,
-    prompts: prompts.length
-      ? prompts
-      : [
-          "Which of these values would change your day-to-day choices the most?",
-          "Where do our top values naturally overlap, and where would they ask for patience?",
-        ],
-  };
+  return insights.slice(0, 4);
 }
 
-function getValueThemes(title: string): Theme[] {
-  return valueThemes[title] ?? ["custom"];
+function buildShareText(rankedValues: Value[]) {
+  const lines = rankedValues.map((value, index) => `${index + 1}. ${value.title} - ${rankLabels[index]}`);
+  return `My Values Game results:\n\n${lines.join("\n")}\n\n${buildSummary(rankedValues)}`;
 }
 
-function prettyTitle(title: string) {
-  if (title !== title.toUpperCase()) return title;
-  return title
-    .toLowerCase()
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
-function scoreThemes(rankedValues: Value[]) {
-  const weights = [4, 3, 2, 1, 1];
-  return rankedValues.reduce<Record<string, number>>((scores, value, index) => {
-    getValueThemes(value.title).forEach((theme) => {
-      scores[theme] = (scores[theme] ?? 0) + (weights[index] ?? 1);
-    });
-    return scores;
-  }, {});
-}
-
-function unique(items: string[]) {
-  return Array.from(new Set(items.filter(Boolean)));
-}
-
-function buildShareText(rankedValues: Value[], profile: ResultProfile) {
-  const lines = rankedValues.map((value, index) => `${index + 1}. ${prettyTitle(value.title)} - ${rankLabels[index]}`);
-  return `My Values Game results:\n\n${profile.archetype}\n${profile.summary}\n\n${lines.join("\n")}`;
-}
-
-async function createShareCardBlob(rankedValues: Value[], profile: ResultProfile) {
+async function createShareCardBlob(rankedValues: Value[]) {
   await document.fonts?.ready;
 
   const canvas = document.createElement("canvas");
@@ -1135,16 +1015,12 @@ async function createShareCardBlob(rankedValues: Value[], profile: ResultProfile
 
   ctx.fillStyle = "#fffaf3";
   ctx.font = "600 92px Georgia, serif";
-  ctx.fillText("My Love", 126, 266);
-  ctx.fillText("Compass", 126, 366);
-
-  ctx.fillStyle = "#c99454";
-  ctx.font = "800 26px Inter, system-ui, sans-serif";
-  ctx.fillText(profile.archetype.toUpperCase(), 126, 424);
+  ctx.fillText("My Values", 126, 278);
+  ctx.fillText("Profile", 126, 378);
 
   ctx.fillStyle = "rgba(255, 250, 243, 0.74)";
-  ctx.font = "400 30px Inter, system-ui, sans-serif";
-  wrapText(ctx, profile.summary, 126, 482, 780, 42, 3);
+  ctx.font = "400 34px Inter, system-ui, sans-serif";
+  wrapText(ctx, buildSummary(rankedValues), 126, 454, 780, 48, 3);
 
   rankedValues.forEach((value, index) => {
     const y = 626 + index * 126;
@@ -1167,7 +1043,7 @@ async function createShareCardBlob(rankedValues: Value[], profile: ResultProfile
 
     ctx.fillStyle = "#fffaf3";
     ctx.font = "600 42px Georgia, serif";
-    ctx.fillText(prettyTitle(value.title), 230, y + 78);
+    ctx.fillText(value.title, 230, y + 78);
   });
 
   ctx.fillStyle = "rgba(255, 250, 243, 0.48)";
