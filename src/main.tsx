@@ -9,7 +9,7 @@ type Value = {
   description: string;
 };
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3 | 4 | 5 | 6;
 type ShareStatus = "idle" | "shared" | "copied" | "saved";
 type Theme =
   | "freedom"
@@ -155,6 +155,8 @@ const valueThemes: Record<string, Theme[]> = {
 function App() {
   const [step, setStep] = React.useState<Step>(1);
   const [firstPicks, setFirstPicks] = React.useState<string[]>([]);
+  const [secondPicks, setSecondPicks] = React.useState<string[]>([]);
+  const [topTenPicks, setTopTenPicks] = React.useState<string[]>([]);
   const [finalPicks, setFinalPicks] = React.useState<string[]>([]);
   const [ranking, setRanking] = React.useState<string[]>([]);
   const [shareStatus, setShareStatus] = React.useState<ShareStatus>("idle");
@@ -162,15 +164,23 @@ function App() {
   const [hiddenFirst, setHiddenFirst] = React.useState<string[]>([]);
 
   const values = React.useMemo(() => [...baseValues, ...customValues], [customValues]);
-  const firstRoundValues = values.filter((value) => !hiddenFirst.includes(value.title));
-  const selectedTen = values.filter((value) => firstPicks.includes(value.title));
+  const splitIndex = Math.ceil(baseValues.length / 2);
+  const firstRoundValues = React.useMemo(() => [...baseValues.slice(0, splitIndex), ...customValues], [customValues, splitIndex]);
+  const secondRoundValues = React.useMemo(() => baseValues.slice(splitIndex), [splitIndex]);
+  const selectedTwenty = React.useMemo(
+    () => values.filter((value) => firstPicks.includes(value.title) || secondPicks.includes(value.title)),
+    [firstPicks, secondPicks, values],
+  );
+  const selectedTen = values.filter((value) => topTenPicks.includes(value.title));
   const rankedValues = ranking.map((title) => values.find((value) => value.title === title)).filter(Boolean) as Value[];
-  const progress = step === 4 ? 100 : Math.round((step / 3) * 100);
+  const progress = step === 6 ? 100 : Math.round(((step - 1) / 5) * 100);
   const canGoBack = step > 1;
   const canGoForward =
     (step === 1 && firstPicks.length === 10) ||
-    (step === 2 && finalPicks.length === 5) ||
-    step === 3;
+    (step === 2 && secondPicks.length === 10) ||
+    (step === 3 && topTenPicks.length === 10) ||
+    (step === 4 && finalPicks.length === 5) ||
+    step === 5;
 
   React.useLayoutEffect(() => {
     const resetScroll = () => {
@@ -199,6 +209,22 @@ function App() {
     );
   }
 
+  function toggleSecond(title: string) {
+    setSecondPicks((current) => {
+      if (current.includes(title)) return current.filter((item) => item !== title);
+      if (current.length >= 10) return current;
+      return [...current, title];
+    });
+  }
+
+  function toggleTopTen(title: string) {
+    setTopTenPicks((current) => {
+      if (current.includes(title)) return current.filter((item) => item !== title);
+      if (current.length >= 10) return current;
+      return [...current, title];
+    });
+  }
+
   function toggleFinal(title: string) {
     setFinalPicks((current) => {
       if (current.includes(title)) return current.filter((item) => item !== title);
@@ -209,11 +235,29 @@ function App() {
 
   function goToRank() {
     setRanking(finalPicks);
-    setStep(3);
+    setStep(5);
   }
 
   function goBack() {
-    setStep((current) => Math.max(1, current - 1) as Step);
+    setStep((current) => {
+      const next = Math.max(1, current - 1) as Step;
+      if (current === 2) {
+        setSecondPicks([]);
+        setTopTenPicks([]);
+        setFinalPicks([]);
+        setRanking([]);
+      } else if (current === 3) {
+        setTopTenPicks([]);
+        setFinalPicks([]);
+        setRanking([]);
+      } else if (current === 4) {
+        setFinalPicks([]);
+        setRanking([]);
+      } else if (current === 5) {
+        setRanking([]);
+      }
+      return next;
+    });
   }
 
   function goForward() {
@@ -225,18 +269,30 @@ function App() {
     }
 
     if (step === 2) {
-      goToRank();
+      setStep(3);
       return;
     }
 
     if (step === 3) {
       setStep(4);
+      return;
+    }
+
+    if (step === 4) {
+      goToRank();
+      return;
+    }
+
+    if (step === 5) {
+      setStep(6);
     }
   }
 
   function restart() {
     setStep(1);
     setFirstPicks([]);
+    setSecondPicks([]);
+    setTopTenPicks([]);
     setFinalPicks([]);
     setRanking([]);
     setShareStatus("idle");
@@ -350,8 +406,9 @@ function App() {
             <PickStep
               key="step-1"
               title="Pick 10"
-              text="Choose the 10 qualities that matter most to you, in no particular order."
-              roundLabel="Round 1 of 3"
+              text="Choose the 10 qualities that matter most to you from this first half, in no particular order."
+              roundLabel="Round 1 of 5"
+              progressLabel="Pick 10"
               intro
               values={firstRoundValues}
               selected={firstPicks}
@@ -367,9 +424,40 @@ function App() {
           {step === 2 && (
             <PickStep
               key="step-2"
+              title="Pick 10"
+              text="Now choose the 10 qualities that matter most to you from the second half, in no particular order."
+              roundLabel="Round 2 of 5"
+              progressLabel="Pick 10"
+              values={secondRoundValues}
+              selected={secondPicks}
+              target={10}
+              stepProgress={Math.round((secondPicks.length / 10) * 100)}
+              onToggle={toggleSecond}
+              onContinue={() => setStep(3)}
+            />
+          )}
+          {step === 3 && (
+            <PickStep
+              key="step-3"
+              title="Narrow to 10"
+              text="Now choose the 10 you couldn't live without from the 20 you picked."
+              roundLabel="Round 3 of 5"
+              progressLabel="Narrow to 10"
+              values={selectedTwenty}
+              selected={topTenPicks}
+              target={10}
+              stepProgress={Math.round((topTenPicks.length / 10) * 100)}
+              onToggle={toggleTopTen}
+              onContinue={() => setStep(4)}
+            />
+          )}
+          {step === 4 && (
+            <PickStep
+              key="step-4"
               title="Narrow to 5"
               text="Now choose the 5 you couldn't live without."
-              roundLabel="Round 2 of 3"
+              roundLabel="Round 4 of 5"
+              progressLabel="Narrow to 5"
               values={selectedTen}
               selected={finalPicks}
               target={5}
@@ -378,17 +466,17 @@ function App() {
               onContinue={goToRank}
             />
           )}
-          {step === 3 && (
+          {step === 5 && (
             <RankStep
-              key="step-3"
-              roundLabel="Round 3 of 3"
+              key="step-5"
+              roundLabel="Round 5 of 5"
               values={values}
               ranking={ranking}
               setRanking={setRanking}
-              onContinue={() => setStep(4)}
+              onContinue={() => setStep(6)}
             />
           )}
-          {step === 4 && (
+          {step === 6 && (
             <Results
               key="results"
               rankedValues={rankedValues}
@@ -413,6 +501,7 @@ function PickStep({
   title,
   text,
   roundLabel,
+  progressLabel,
   intro = false,
   values: stepValues,
   selected,
@@ -427,6 +516,7 @@ function PickStep({
   title: string;
   text: string;
   roundLabel: string;
+  progressLabel: string;
   intro?: boolean;
   values: Value[];
   selected: string[];
@@ -441,7 +531,6 @@ function PickStep({
   const canContinue = selected.length === target;
   const left = Math.max(target - selected.length, 0);
   const [activeValue, setActiveValue] = React.useState<Value | null>(null);
-  const hiddenValues = stepValues.filter((value) => hiddenTitles.includes(value.title));
 
   React.useEffect(() => {
     setActiveValue((current) => {
@@ -509,8 +598,9 @@ function PickStep({
             key={value.title}
             value={value}
             selected={selected.includes(value.title)}
+            hidden={hiddenTitles.includes(value.title)}
             onToggle={handleToggle}
-            onHide={onToggleHidden ? () => onToggleHidden(value.title) : undefined}
+            onToggleHidden={onToggleHidden ? () => onToggleHidden(value.title) : undefined}
             canHide={!selected.includes(value.title) && Boolean(onToggleHidden)}
             index={index}
           />
@@ -520,7 +610,7 @@ function PickStep({
 
       <div className="pointer-events-none fixed inset-x-4 bottom-[5.5rem] z-10 mx-auto max-w-md rounded-[1.15rem] border border-white/85 bg-white/95 px-4 py-3 shadow-lift backdrop-blur-xl">
         <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-rosewood/68">
-          <span>{roundLabel === "Round 1 of 3" ? "Pick 10" : "Narrow to 5"}</span>
+          <span>{progressLabel}</span>
           <span>
             {selected.length}/{target}
           </span>
@@ -535,38 +625,6 @@ function PickStep({
         <div className="mt-2 text-[11px] leading-4 text-ink/58">
           {selected.length === target ? "You’re ready to continue." : `${left} more to go.`}
         </div>
-        {onToggleHidden && (
-          <div className="mt-3 border-t border-ink/8 pt-3">
-            <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.16em] text-honey">
-              <span>Holding pen</span>
-              <span>{hiddenValues.length} hidden</span>
-            </div>
-            {hiddenValues.length > 0 ? (
-              <>
-                <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  {hiddenValues.map((value) => (
-                    <button
-                      key={value.title}
-                      type="button"
-                      onClick={() => onToggleHidden(value.title)}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-rosewood/18 bg-[#fff4ef] px-3 py-1.5 text-xs font-semibold text-rosewood shadow-sm"
-                    >
-                      <EyeOff className="h-3.5 w-3.5" />
-                      {prettyTitle(value.title)}
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-2 text-[11px] leading-4 text-ink/52">
-                  Tap a hidden card to bring it back.
-                </div>
-              </>
-            ) : (
-              <div className="rounded-[0.95rem] border border-dashed border-ink/10 bg-linen/75 px-3 py-3 text-[11px] leading-4 text-ink/45">
-                Hidden cards will collect here.
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       <ActionBar
@@ -581,61 +639,97 @@ function PickStep({
 function ValueCard({
   value,
   selected,
+  hidden,
   onToggle,
-  onHide,
+  onToggleHidden,
   canHide = false,
   index,
 }: {
   value: Value;
   selected: boolean;
+  hidden: boolean;
   onToggle: (value: Value) => void;
-  onHide?: () => void;
+  onToggleHidden?: () => void;
   canHide?: boolean;
   index: number;
 }) {
+  function handleClick() {
+    if (hidden) {
+      onToggleHidden?.();
+      return;
+    }
+
+    onToggle(value);
+  }
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(index * 0.018, 0.25) }}
-      className={`group relative flex aspect-[0.94] w-full items-center justify-center overflow-hidden rounded-[1rem] border px-1.5 py-2 text-center shadow-soft transition ${
-        selected
-          ? "border-rosewood/70 bg-[#fff4ef] shadow-lift ring-1 ring-rosewood/10"
-          : "border-white/90 bg-white/82 hover:border-blush hover:bg-white"
-      }`}
-    >
-      {canHide && onHide && (
+    <div className="relative" style={{ perspective: "1200px" }}>
+      <motion.button
+        type="button"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0, rotateY: hidden ? 180 : 0 }}
+        transition={{ delay: Math.min(index * 0.018, 0.25), type: "spring", stiffness: 120, damping: 16 }}
+        whileTap={{ scale: 0.985 }}
+        onClick={handleClick}
+        className={`group relative flex aspect-[0.94] w-full items-center justify-center overflow-hidden rounded-[1rem] border px-1.5 py-2 text-center shadow-soft transition ${
+          hidden
+            ? "border-ink/10 bg-[#4b3d38] shadow-lift"
+            : selected
+              ? "border-rosewood/70 bg-[#fff4ef] shadow-lift ring-1 ring-rosewood/10"
+              : "border-white/90 bg-white/82 hover:border-blush hover:bg-white"
+        }`}
+        style={{ transformStyle: "preserve-3d" }}
+        aria-pressed={selected}
+      >
+        <div
+          className="absolute inset-0 flex items-center justify-center rounded-[1rem] px-1.5 py-2"
+          style={{ backfaceVisibility: "hidden" }}
+        >
+          <span
+            className={`break-words font-serif text-[clamp(0.66rem,2.6vw,0.92rem)] font-semibold leading-[1.05] ${
+              hidden ? "text-white/92" : selected ? "text-rosewood" : "text-ink"
+            }`}
+          >
+            {value.title}
+          </span>
+        </div>
+
+        <div
+          className="absolute inset-0 flex items-center justify-center rounded-[1rem] px-2 py-2"
+          style={{
+            transform: "rotateY(180deg)",
+            backfaceVisibility: "hidden",
+          }}
+        >
+          <div className="h-full w-full rounded-[0.9rem] bg-[#ede6dc]" />
+        </div>
+
+        {!hidden && (
+          <span
+            className={`pointer-events-none absolute right-1 top-1 grid h-4 w-4 shrink-0 place-items-center rounded-full border transition ${
+              selected ? "border-rosewood bg-rosewood text-white shadow-sm" : "border-ink/12 bg-linen text-transparent"
+            }`}
+          >
+            <Check className="h-2.5 w-2.5" />
+          </span>
+        )}
+      </motion.button>
+
+      {!hidden && canHide && onToggleHidden && (
         <button
           type="button"
           onClick={(event) => {
             event.stopPropagation();
-            onHide();
+            onToggleHidden();
           }}
-          className="absolute left-1 top-1 grid h-5 w-5 place-items-center rounded-full border border-ink/12 bg-white/90 text-ink/42 transition hover:text-rosewood"
+          className="absolute left-1 top-1 z-10 grid h-5 w-5 place-items-center rounded-full border border-ink/12 bg-white/90 text-ink/42 transition hover:text-rosewood"
           title="Hide this card"
           aria-label={`Hide ${value.title}`}
         >
           <EyeOff className="h-3 w-3" />
         </button>
       )}
-      <button
-        type="button"
-        className="flex h-full w-full items-center justify-center"
-        onClick={() => onToggle(value)}
-        aria-pressed={selected}
-      >
-        <span className={`break-words font-serif text-[clamp(0.66rem,2.6vw,0.92rem)] font-semibold leading-[1.05] ${selected ? "text-rosewood" : "text-ink"}`}>
-          {value.title}
-        </span>
-      </button>
-      <span
-        className={`pointer-events-none absolute right-1 top-1 grid h-4 w-4 shrink-0 place-items-center rounded-full border transition ${
-          selected ? "border-rosewood bg-rosewood text-white shadow-sm" : "border-ink/12 bg-linen text-transparent"
-        }`}
-      >
-        <Check className="h-2.5 w-2.5" />
-      </span>
-    </motion.div>
+    </div>
   );
 }
 
@@ -794,7 +888,7 @@ function Results({
       className="pb-8"
     >
       <div className="mb-5">
-        <h2 className="font-serif text-5xl leading-[0.95] text-rosewood">Your Love Compass</h2>
+        <h2 className="font-serif text-5xl leading-[0.95] text-rosewood">Your Values Profile</h2>
         <div className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-honey">{profile.archetype}</div>
         <p className="mt-2 text-sm leading-6 text-ink/62">{profile.summary}</p>
       </div>
