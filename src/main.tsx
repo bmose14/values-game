@@ -84,7 +84,7 @@ function pluralize(word: string, count: number) {
 
 function buildChooseText(availableCount: number, limit: number) {
   const cap = Math.min(limit, availableCount);
-  return `Choose up to ${cap} ${pluralize("quality", cap)} that matter most to you.`;
+  return `Choose up to ${cap} ${pluralize("quality", cap)} that matter most to you from this list. Tap the eye icon in the top-left corner of any card to hide it from view.`;
 }
 
 function buildNarrowText(availableCount: number, limit: number) {
@@ -439,7 +439,10 @@ function App() {
         </AnimatePresence>
         <footer className="mt-auto border-t border-white/65 pb-40 pt-6 text-center text-[11px] leading-5 text-ink/55">
           <div>
-            Developed by Brian Moseley · {APP_VERSION} · Last Updated: {APP_LAST_UPDATED}
+            Developed by Brian Moseley · {APP_VERSION}
+          </div>
+          <div>
+            Last Updated: {APP_LAST_UPDATED}
           </div>
           <div>
             Feedback or comments email{" "}
@@ -995,7 +998,7 @@ function buildSummary(rankedValues: Value[]) {
   const [first, second, third] = rankedValues;
   if (!first || !second || !third) return "Your results are ready.";
 
-  return `You lead with ${first.title.toLowerCase()}, supported by ${second.title.toLowerCase()} and ${third.title.toLowerCase()}. In partnership, that points to someone who wants chemistry, shared direction, and a practical fit.`;
+  return `You lead with ${first.title.toLowerCase()}, supported by ${second.title.toLowerCase()} and ${third.title.toLowerCase()}.`;
 }
 
 function buildShareText(rankedValues: Value[]) {
