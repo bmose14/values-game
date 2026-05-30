@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { AnimatePresence, Reorder, motion, useDragControls } from "framer-motion";
-import { Check, ChevronLeft, ChevronRight, Copy, EyeOff, GripVertical, Heart, Plus, RotateCcw, Share2, Sparkles } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Copy, EyeOff, Heart, Plus, RotateCcw, Share2, Sparkles } from "lucide-react";
 import "./styles.css";
 
 type Value = {
@@ -73,8 +73,10 @@ const baseValues: Value[] = [
 
 const rankLabels = ["Core Value", "Very Important", "Important", "Meaningful", "Still Matters"];
 declare const __APP_VERSION__: string;
+declare const __APP_LAST_UPDATED__: string;
 
 const APP_VERSION = __APP_VERSION__;
+const APP_LAST_UPDATED = __APP_LAST_UPDATED__;
 
 function pluralize(word: string, count: number) {
   return count === 1 ? word : `${word}s`;
@@ -436,10 +438,15 @@ function App() {
           )}
         </AnimatePresence>
         <footer className="mt-auto border-t border-white/65 pb-40 pt-6 text-center text-[11px] leading-5 text-ink/55">
-          Developed by Brian Moseley · May 2026 · {APP_VERSION} · For feedback email{" "}
-          <a className="font-semibold text-rosewood/70" href="mailto:bmose14@gmail.com">
-            bmose14@gmail.com
-          </a>
+          <div>
+            Developed by Brian Moseley · {APP_VERSION} · Last Updated: {APP_LAST_UPDATED}
+          </div>
+          <div>
+            Feedback or comments email{" "}
+            <a className="font-semibold text-rosewood/70" href="mailto:bmose14+values@gmail.com">
+              bmose14+values@gmail.com
+            </a>
+          </div>
         </footer>
       </div>
     </main>
@@ -776,7 +783,15 @@ function RankStep({
   setRanking: (items: string[]) => void;
   onContinue: () => void;
 }) {
-  const dragControls = useDragControls();
+  function moveItem(index: number, direction: -1 | 1) {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= ranking.length) return;
+
+    const next = [...ranking];
+    const [item] = next.splice(index, 1);
+    next.splice(nextIndex, 0, item);
+    setRanking(next);
+  }
 
   return (
     <motion.section
@@ -793,18 +808,14 @@ function RankStep({
         </p>
       </div>
 
-      <Reorder.Group axis="y" values={ranking} onReorder={setRanking} className="space-y-3 pb-24 touch-pan-y">
+      <div className="space-y-3 pb-24">
         {ranking.map((title, index) => {
           const value = values.find((item) => item.title === title);
           if (!value) return null;
 
           return (
-            <Reorder.Item
+            <motion.div
               key={title}
-              value={title}
-              dragListener={false}
-              dragControls={dragControls}
-              whileDrag={{ scale: 1.025, boxShadow: "0 24px 55px rgba(100, 58, 45, 0.20)" }}
               className="rounded-[1.35rem] border border-white/90 bg-white p-4 shadow-soft"
             >
               <div className="flex items-center gap-3">
@@ -816,20 +827,33 @@ function RankStep({
                   <div className="mt-1 font-serif text-2xl leading-6">{value.title}</div>
                   <div className="mt-1 text-sm leading-5 text-ink/55">{value.description}</div>
                 </div>
-                <button
-                  type="button"
-                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink/5 text-ink/35 transition active:scale-95"
-                  onPointerDown={(event) => dragControls.start(event)}
-                  aria-label={`Drag ${value.title}`}
-                  title={`Drag ${value.title}`}
-                >
-                  <GripVertical className="h-5 w-5" />
-                </button>
+                <div className="flex shrink-0 flex-col gap-1">
+                  <button
+                    type="button"
+                    className="grid h-9 w-9 place-items-center rounded-full bg-ink/5 text-ink/45 transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
+                    onClick={() => moveItem(index, -1)}
+                    disabled={index === 0}
+                    aria-label={`Move ${value.title} up`}
+                    title={`Move ${value.title} up`}
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    className="grid h-9 w-9 place-items-center rounded-full bg-ink/5 text-ink/45 transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
+                    onClick={() => moveItem(index, 1)}
+                    disabled={index === ranking.length - 1}
+                    aria-label={`Move ${value.title} down`}
+                    title={`Move ${value.title} down`}
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            </Reorder.Item>
+            </motion.div>
           );
         })}
-      </Reorder.Group>
+      </div>
 
       <ActionBar label="Reveal Results" onClick={onContinue} />
     </motion.section>
