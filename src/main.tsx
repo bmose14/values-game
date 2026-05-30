@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { AnimatePresence, Reorder, motion } from "framer-motion";
+import { AnimatePresence, Reorder, motion, useDragControls } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight, Copy, EyeOff, GripVertical, Heart, Plus, RotateCcw, Share2, Sparkles } from "lucide-react";
 import "./styles.css";
 
@@ -73,6 +73,24 @@ const baseValues: Value[] = [
 
 const rankLabels = ["Core Value", "Very Important", "Important", "Meaningful", "Still Matters"];
 
+function pluralize(word: string, count: number) {
+  return count === 1 ? word : `${word}s`;
+}
+
+function buildChooseText(availableCount: number, limit: number) {
+  const cap = Math.min(limit, availableCount);
+  return `Choose up to ${cap} ${pluralize("quality", cap)} that matter most to you.`;
+}
+
+function buildNarrowText(availableCount: number, limit: number) {
+  const cap = Math.min(limit, availableCount);
+  if (availableCount === 0) {
+    return "You have 0 picks so far. Move forward when you're ready.";
+  }
+
+  return `From your ${availableCount} ${pluralize("pick", availableCount)}, keep up to ${cap} that matter most.`;
+}
+
 function App() {
   const [step, setStep] = React.useState<Step>(1);
   const [firstPicks, setFirstPicks] = React.useState<string[]>([]);
@@ -97,12 +115,7 @@ function App() {
   const rankedValues = ranking.map((title) => values.find((value) => value.title === title)).filter(Boolean) as Value[];
   const progress = step === 6 ? 100 : Math.round(((step - 1) / 5) * 100);
   const canGoBack = step > 1;
-  const canGoForward =
-    (step === 1 && firstPicks.length === 10) ||
-    (step === 2 && secondPicks.length === 10) ||
-    (step === 3 && topTenPicks.length === 10) ||
-    (step === 4 && finalPicks.length === 5) ||
-    step === 5;
+  const canGoForward = step >= 1 && step <= 5;
 
   React.useLayoutEffect(() => {
     const resetScroll = () => {
@@ -345,7 +358,7 @@ function App() {
             <PickStep
               key="step-1"
               title="Pick 10"
-              text="Choose the 10 qualities that matter most to you, in no particular order."
+              text={buildChooseText(firstRoundValues.length, 10)}
               roundLabel="Round 1 of 5"
               intro
               values={firstRoundValues}
@@ -362,7 +375,7 @@ function App() {
             <PickStep
               key="step-2"
               title="Pick 10"
-              text="Choose 10 more from the second half of the deck."
+              text={buildChooseText(secondRoundValues.length, 10)}
               roundLabel="Round 2 of 5"
               values={secondRoundValues}
               selected={secondPicks}
@@ -377,7 +390,7 @@ function App() {
             <PickStep
               key="step-3"
               title="Narrow to 10"
-              text="From your 20 picks, keep the 10 that matter most."
+              text={buildNarrowText(selectedTwenty.length, 10)}
               roundLabel="Round 3 of 5"
               values={selectedTwenty}
               selected={topTenPicks}
@@ -390,7 +403,7 @@ function App() {
             <PickStep
               key="step-4"
               title="Narrow to 5"
-              text="Now choose the 5 you couldn't live without."
+              text={buildNarrowText(selectedTen.length, 5)}
               roundLabel="Round 4 of 5"
               values={selectedTen}
               selected={finalPicks}
@@ -457,9 +470,8 @@ function PickStep({
   onContinue: () => void;
   onAddCustom?: (title: string) => boolean;
 }) {
-  const canContinue = selected.length === target;
   const left = Math.max(target - selected.length, 0);
-  const progress = target ? (selected.length / target) * 100 : 0;
+  const progress = target ? Math.min(selected.length / target, 1) * 100 : 0;
   const [activeValue, setActiveValue] = React.useState<Value | null>(null);
   const [showExplainer, setShowExplainer] = React.useState(false);
   const scrollAnchorRef = React.useRef<HTMLDivElement | null>(null);
@@ -581,8 +593,7 @@ function PickStep({
       </div>
 
       <ActionBar
-        label={canContinue ? "Continue" : `${selected.length} selected · ${left} left`}
-        disabled={!canContinue}
+        label="Continue"
         onClick={onContinue}
       />
     </motion.section>
@@ -762,6 +773,8 @@ function RankStep({
   setRanking: (items: string[]) => void;
   onContinue: () => void;
 }) {
+  const dragControls = useDragControls();
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 18 }}
@@ -777,7 +790,7 @@ function RankStep({
         </p>
       </div>
 
-      <Reorder.Group axis="y" values={ranking} onReorder={setRanking} className="space-y-3 pb-24">
+      <Reorder.Group axis="y" values={ranking} onReorder={setRanking} className="space-y-3 pb-24 touch-pan-y">
         {ranking.map((title, index) => {
           const value = values.find((item) => item.title === title);
           if (!value) return null;
@@ -786,8 +799,10 @@ function RankStep({
             <Reorder.Item
               key={title}
               value={title}
+              dragListener={false}
+              dragControls={dragControls}
               whileDrag={{ scale: 1.025, boxShadow: "0 24px 55px rgba(100, 58, 45, 0.20)" }}
-              className="touch-none rounded-[1.35rem] border border-white/90 bg-white p-4 shadow-soft"
+              className="rounded-[1.35rem] border border-white/90 bg-white p-4 shadow-soft"
             >
               <div className="flex items-center gap-3">
                 <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#fff4ef] font-serif text-2xl text-rosewood">
@@ -798,7 +813,15 @@ function RankStep({
                   <div className="mt-1 font-serif text-2xl leading-6">{value.title}</div>
                   <div className="mt-1 text-sm leading-5 text-ink/55">{value.description}</div>
                 </div>
-                <GripVertical className="h-5 w-5 shrink-0 text-ink/24" />
+                <button
+                  type="button"
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink/5 text-ink/35 transition active:scale-95"
+                  onPointerDown={(event) => dragControls.start(event)}
+                  aria-label={`Drag ${value.title}`}
+                  title={`Drag ${value.title}`}
+                >
+                  <GripVertical className="h-5 w-5" />
+                </button>
               </div>
             </Reorder.Item>
           );
@@ -821,7 +844,6 @@ function Results({
   onRestart: () => void;
   shareStatus: ShareStatus;
 }) {
-  const insights = buildInsights(rankedValues.map((value) => value.title));
   const shareLabel =
     shareStatus === "shared"
       ? "Shared"
@@ -863,19 +885,6 @@ function Results({
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="mt-4 space-y-3">
-        {insights.map((insight) => (
-          <motion.div
-            key={insight}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="rounded-[1.25rem] border border-white/80 bg-white/72 p-4 text-sm leading-6 text-ink/68 shadow-soft"
-          >
-            {insight}
-          </motion.div>
-        ))}
       </div>
 
       <div className="mt-5 grid grid-cols-[1fr_auto] gap-3">
@@ -946,7 +955,7 @@ function ActionBar({
         <button
           disabled={disabled}
           onClick={handleClick}
-          className="h-14 w-full rounded-full bg-rosewood px-5 font-semibold text-white shadow-lift transition active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink/18 disabled:text-ink/40 disabled:shadow-none"
+          className="h-14 w-full cursor-pointer rounded-full bg-rosewood px-5 font-semibold text-white shadow-lift transition active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink/18 disabled:text-ink/40 disabled:shadow-none"
         >
           {label}
         </button>
@@ -959,18 +968,7 @@ function buildSummary(rankedValues: Value[]) {
   const [first, second, third] = rankedValues;
   if (!first || !second || !third) return "Your results are ready.";
 
-  return `You lead with ${first.title.toLowerCase()}, supported by ${second.title.toLowerCase()} and ${third.title.toLowerCase()}. In partnership, that points to someone who wants chemistry, choices, and daily life to line up in a way that feels honest.`;
-}
-
-function buildInsights(titles: string[]) {
-  const has = (title: string) => titles.includes(title);
-  const insights: string[] = [];
-
-  if (has("FREEDOM")) insights.push("High freedom suggests attraction grows when independence and trust can coexist.");
-  if (has("KINDNESS")) insights.push("Kindness near the top points to warmth, care, and real generosity.");
-  if (has("AMBITIOUSNESS") || has("SUCCESS")) insights.push("Ambitiousness or success suggests you want a relationship that keeps moving forward.");
-
-  return insights.slice(0, 4);
+  return `You lead with ${first.title.toLowerCase()}, supported by ${second.title.toLowerCase()} and ${third.title.toLowerCase()}. In partnership, that points to someone who wants chemistry, shared direction, and a practical fit.`;
 }
 
 function buildShareText(rankedValues: Value[]) {
