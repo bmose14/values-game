@@ -72,6 +72,9 @@ const baseValues: Value[] = [
 ];
 
 const rankLabels = ["Core Value", "Very Important", "Important", "Meaningful", "Still Matters"];
+declare const __APP_VERSION__: string;
+
+const APP_VERSION = __APP_VERSION__;
 
 function pluralize(word: string, count: number) {
   return count === 1 ? word : `${word}s`;
@@ -433,7 +436,7 @@ function App() {
           )}
         </AnimatePresence>
         <footer className="mt-auto border-t border-white/65 pb-40 pt-6 text-center text-[11px] leading-5 text-ink/55">
-          Developed by Brian Moseley · May 2026 · For feedback email{" "}
+          Developed by Brian Moseley · May 2026 · {APP_VERSION} · For feedback email{" "}
           <a className="font-semibold text-rosewood/70" href="mailto:bmose14@gmail.com">
             bmose14@gmail.com
           </a>
