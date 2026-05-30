@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
-import { Check, ChevronLeft, ChevronRight, Copy, GripVertical, Heart, Plus, RotateCcw, Share2, Sparkles } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Copy, EyeOff, GripVertical, Heart, Plus, RotateCcw, Share2, Sparkles } from "lucide-react";
 import "./styles.css";
 
 type Value = {
@@ -17,6 +17,7 @@ type Theme =
   | "family"
   | "growth"
   | "adventure"
+  | "pleasure"
   | "sensuality"
   | "spirituality"
   | "practicality"
@@ -28,70 +29,127 @@ type Theme =
 type ResultProfile = {
   archetype: string;
   summary: string;
-  observations: string[];
   prompts: string[];
 };
 
 const baseValues: Value[] = [
-  { title: "Health", description: "Physical vitality and long-term well-being" },
-  { title: "Freedom", description: "Autonomy and self-direction" },
-  { title: "Curiosity", description: "Desire to learn and explore" },
-  { title: "Capability", description: "Effectiveness, resilience, and problem-solving ability" },
-  { title: "Spiritual Life", description: "Connection to something greater" },
-  { title: "Self-Discipline", description: "Consistency and control over impulses and emotions" },
-  { title: "Value of Sex", description: "Viewing sex as meaningful and connective" },
-  { title: "Mature Love", description: "Love rooted in commitment and sacrifice" },
-  { title: "Social Connection", description: "Feeling connected to people, community, and culture" },
-  { title: "Adventure", description: "Desire for exploration and meaningful experiences" },
-  { title: "Unity with Nature", description: "Feeling grounded and connected to the natural world" },
-  { title: "Efficiency", description: "Using time and energy wisely" },
-  { title: "Practicality", description: "Prioritizing what works in real life" },
-  { title: "Ambition", description: "Drive toward growth, achievement, and self-actualization" },
-  { title: "Emotional Stability", description: "Remaining calm and reliable under stress" },
-  { title: "Emotional Honesty", description: "Speaking truthfully about feelings and needs" },
-  { title: "Long-Term Partnership", description: "Building a meaningful life with one person" },
-  { title: "Rooted Family Life", description: "Finding meaning in family, home, and shared routines" },
-  { title: "Resilience", description: "Ability to endure hardship and adapt" },
-  { title: "Financial Abundance", description: "Creating security and optionality" },
-  { title: "Responsibility", description: "Taking ownership of obligations and consequences" },
-  { title: "Loyalty", description: "Remaining committed during difficult seasons" },
-  { title: "Spontaneity", description: "Preference for novelty, flexibility, and unplanned experiences" },
-  { title: "Comfort", description: "Preference for ease and low friction" },
-  { title: "Reinvention", description: "Desire for continuous transformation and change" },
-  { title: "Refinement", description: "Attraction to beauty, quality, status, and elevated experiences" },
-  { title: "Aesthetic Living", description: "Prioritizing beauty and atmosphere" },
+  { title: "INNER HARMONY", description: "Feeling calm, centered, and at peace within yourself" },
+  { title: "EQUALITY", description: "Wanting fairness, mutual respect, and shared power" },
+  { title: "SOCIAL POWER", description: "Having influence, leverage, and a strong place in the room" },
+  { title: "PLEASURE", description: "Enjoying life through comfort, sensuality, and delight" },
+  { title: "FREEDOM", description: "Valuing autonomy, movement, and self-direction" },
+  { title: "SPIRITUAL LIFE", description: "Feeling connected to something greater than yourself" },
+  { title: "SENSE OF BELONGING", description: "Feeling accepted, included, and rooted with others" },
+  { title: "SOCIAL ORDER", description: "Preferring structure, rules, and a dependable social world" },
+  { title: "FULFILLMENT OF LIFE", description: "Wanting a life that feels whole, meaningful, and complete" },
+  { title: "MEANING OF LIFE", description: "Seeking purpose, direction, and a clear reason to live" },
+  { title: "KINDNESS", description: "Choosing warmth, care, and generosity toward others" },
+  { title: "WEALTH", description: "Creating financial security, options, and room to breathe" },
+  { title: "NATIONAL SECURITY", description: "Valuing safety, order, and protection at a larger scale" },
+  { title: "SELF-RESPECT", description: "Holding yourself to a standard and wanting to live with dignity" },
+  { title: "SUCCESS", description: "Wanting results, achievement, and visible momentum" },
+  { title: "CREATIVITY", description: "Expressing imagination, originality, and fresh thinking" },
+  { title: "PEACE IN THE WORLD", description: "Wanting harmony, reduced conflict, and a gentler world" },
+  { title: "RESPECT FOR TRADITIONS", description: "Valuing rituals, continuity, and inherited wisdom" },
+  { title: "MATURE LOVE", description: "Seeing love as steady, committed, and worth sacrifice" },
+  { title: "SELF-DISCIPLINE", description: "Choosing consistency, restraint, and self-control" },
+  { title: "CONFIDENTIALITY", description: "Protecting trust by keeping private things private" },
+  { title: "FAMILY SAFETY", description: "Wanting home, children, and loved ones to feel protected" },
+  { title: "SOCIAL RECOGNITION", description: "Wanting to be seen, respected, and publicly valued" },
+  { title: "UNITY WITH NATURE", description: "Feeling grounded through the natural world and the outdoors" },
+  { title: "DIVERSITY OF LIFE", description: "Welcoming variety, change, and many different experiences" },
+  { title: "WISDOM", description: "Valuing good judgment, perspective, and mature thinking" },
+  { title: "EMPOWERMENT", description: "Wanting agency, confidence, and real capacity to act" },
+  { title: "TRUE FRIENDSHIP", description: "Wanting trust, companionship, and genuine mutual liking" },
+  { title: "WORLD OF BEAUTY", description: "Seeking beauty, refinement, and aesthetically rich surroundings" },
+  { title: "SOCIAL JUSTICE", description: "Caring about fairness, dignity, and how people are treated" },
+  { title: "INDEPENDENCE", description: "Preferring self-reliance and the freedom to stand on your own" },
+  { title: "SELF-CONTROL", description: "Staying steady by managing impulses and emotions" },
+  { title: "VALUE OF SEX", description: "Seeing sex as meaningful, connective, and important" },
+  { title: "AMBITIOUSNESS", description: "Pursuing growth, achievement, and high goals" },
+  { title: "TOLERANCE", description: "Making room for differences, imperfection, and mixed views" },
+  { title: "MODESTY", description: "Preferring humility, restraint, and not making a fuss" },
+  { title: "THIRST FOR ADVENTURE", description: "Wanting exploration, novelty, and meaningful risk" },
+  { title: "PROTECTION OF THE ENVIRONMENT", description: "Caring about the natural world and long-term stewardship" },
+  { title: "INFLUENCE", description: "Wanting the ability to shape outcomes and affect others" },
+  { title: "RESPECT FOR PARENTS AND ELDERLY PEOPLE", description: "Honoring family, age, and the people who came before" },
+  { title: "CHOOSING MY OWN GOALS", description: "Wanting to set your own path rather than inherit one" },
+  { title: "HEALTH", description: "Protecting physical vitality, energy, and long-term well-being" },
+  { title: "COMPETENCE", description: "Being capable, effective, and able to solve problems" },
+  { title: "ACCEPTING ALL SIDES OF LIFE", description: "Making peace with complexity, hardship, and contradiction" },
+  { title: "HONESTY", description: "Telling the truth and wanting truth in return" },
+  { title: "REPUTATION", description: "Caring how you are known and whether your name carries weight" },
+  { title: "BEING HEARD", description: "Wanting your voice to matter and your perspective to land" },
+  { title: "INTELLECT", description: "Valuing thought, learning, and mental sharpness" },
+  { title: "ENJOYMENT OF LIFE", description: "Wanting life to feel good, alive, and worth savoring" },
+  { title: "USEFULNESS", description: "Wanting to contribute, help, and matter in practical ways" },
+  { title: "FAITH", description: "Trusting in God, belief, or a larger spiritual order" },
+  { title: "RESPONSIBILITY", description: "Owning obligations, consequences, and follow-through" },
+  { title: "CURIOSITY", description: "Wanting to learn, explore, and keep discovering" },
+  { title: "FORGIVENESS", description: "Making room for repair, mercy, and a second chance" },
+  { title: "CLEANLINESS", description: "Preferring order, neatness, and a tidy environment" },
+  { title: "SELF-EVALUATION", description: "Looking inward, reflecting honestly, and improving over time" },
 ];
 
 const rankLabels = ["Core Value", "Very Important", "Important", "Meaningful", "Still Matters"];
 
 const valueThemes: Record<string, Theme[]> = {
-  Health: ["stability", "practicality"],
-  Freedom: ["freedom"],
-  Curiosity: ["growth", "adventure"],
-  Capability: ["practicality", "growth"],
-  "Spiritual Life": ["spirituality", "stability"],
-  "Self-Discipline": ["practicality", "stability"],
-  "Value of Sex": ["sensuality", "connection"],
-  "Mature Love": ["connection", "family", "stability"],
-  "Social Connection": ["connection"],
-  Adventure: ["adventure", "freedom"],
-  "Unity with Nature": ["spirituality", "stability"],
-  Efficiency: ["practicality"],
-  Practicality: ["practicality", "stability"],
-  Ambition: ["growth", "status"],
-  "Emotional Stability": ["stability"],
-  "Emotional Honesty": ["connection", "stability"],
-  "Long-Term Partnership": ["connection", "family", "stability"],
-  "Rooted Family Life": ["family", "stability"],
-  Resilience: ["stability", "growth"],
-  "Financial Abundance": ["practicality", "status"],
-  Responsibility: ["practicality", "stability"],
-  Loyalty: ["connection", "stability"],
-  Spontaneity: ["adventure", "freedom"],
-  Comfort: ["stability"],
-  Reinvention: ["growth", "freedom"],
-  Refinement: ["beauty", "status"],
-  "Aesthetic Living": ["beauty", "stability"],
+  "INNER HARMONY": ["spirituality", "stability"],
+  EQUALITY: ["connection", "stability"],
+  "SOCIAL POWER": ["status", "growth"],
+  PLEASURE: ["sensuality", "connection"],
+  FREEDOM: ["freedom"],
+  "SPIRITUAL LIFE": ["spirituality", "stability"],
+  "SENSE OF BELONGING": ["connection", "family"],
+  "SOCIAL ORDER": ["stability", "practicality"],
+  "FULFILLMENT OF LIFE": ["spirituality", "growth"],
+  "MEANING OF LIFE": ["spirituality", "growth"],
+  KINDNESS: ["connection", "stability"],
+  WEALTH: ["practicality", "status"],
+  "NATIONAL SECURITY": ["stability", "status"],
+  "SELF-RESPECT": ["stability", "connection"],
+  SUCCESS: ["growth", "status"],
+  CREATIVITY: ["growth", "beauty"],
+  "PEACE IN THE WORLD": ["spirituality", "connection"],
+  "RESPECT FOR TRADITIONS": ["stability", "family"],
+  "MATURE LOVE": ["connection", "family", "stability"],
+  "SELF-DISCIPLINE": ["practicality", "stability"],
+  CONFIDENTIALITY: ["stability", "connection"],
+  "FAMILY SAFETY": ["family", "stability"],
+  "SOCIAL RECOGNITION": ["status", "connection"],
+  "UNITY WITH NATURE": ["spirituality", "stability"],
+  "DIVERSITY OF LIFE": ["growth", "adventure"],
+  WISDOM: ["stability", "growth"],
+  EMPOWERMENT: ["freedom", "status"],
+  "TRUE FRIENDSHIP": ["connection", "family"],
+  "WORLD OF BEAUTY": ["beauty", "status"],
+  "SOCIAL JUSTICE": ["connection", "spirituality"],
+  INDEPENDENCE: ["freedom"],
+  "SELF-CONTROL": ["practicality", "stability"],
+  "VALUE OF SEX": ["sensuality", "connection"],
+  AMBITIOUSNESS: ["growth", "status"],
+  TOLERANCE: ["connection", "stability"],
+  MODESTY: ["stability", "family"],
+  "THIRST FOR ADVENTURE": ["adventure", "freedom"],
+  "PROTECTION OF THE ENVIRONMENT": ["spirituality", "stability"],
+  INFLUENCE: ["status", "growth"],
+  "RESPECT FOR PARENTS AND ELDERLY PEOPLE": ["family", "stability"],
+  "CHOOSING MY OWN GOALS": ["freedom", "growth"],
+  HEALTH: ["stability", "practicality"],
+  COMPETENCE: ["practicality", "growth"],
+  "ACCEPTING ALL SIDES OF LIFE": ["spirituality", "stability"],
+  HONESTY: ["connection", "stability"],
+  REPUTATION: ["status", "stability"],
+  "BEING HEARD": ["connection", "status"],
+  INTELLECT: ["growth", "practicality"],
+  "ENJOYMENT OF LIFE": ["pleasure", "connection"],
+  USEFULNESS: ["practicality", "connection"],
+  FAITH: ["spirituality", "stability"],
+  RESPONSIBILITY: ["practicality", "stability"],
+  CURIOSITY: ["growth", "adventure"],
+  FORGIVENESS: ["connection", "stability"],
+  CLEANLINESS: ["practicality", "stability"],
+  "SELF-EVALUATION": ["growth", "stability"],
 };
 
 function App() {
@@ -101,8 +159,10 @@ function App() {
   const [ranking, setRanking] = React.useState<string[]>([]);
   const [shareStatus, setShareStatus] = React.useState<ShareStatus>("idle");
   const [customValues, setCustomValues] = React.useState<Value[]>([]);
+  const [hiddenFirst, setHiddenFirst] = React.useState<string[]>([]);
 
   const values = React.useMemo(() => [...baseValues, ...customValues], [customValues]);
+  const firstRoundValues = values.filter((value) => !hiddenFirst.includes(value.title));
   const selectedTen = values.filter((value) => firstPicks.includes(value.title));
   const rankedValues = ranking.map((title) => values.find((value) => value.title === title)).filter(Boolean) as Value[];
   const progress = step === 4 ? 100 : Math.round((step / 3) * 100);
@@ -131,6 +191,12 @@ function App() {
       if (current.length >= 10) return current;
       return [...current, title];
     });
+  }
+
+  function toggleHiddenFirst(title: string) {
+    setHiddenFirst((current) =>
+      current.includes(title) ? current.filter((item) => item !== title) : [...current, title]
+    );
   }
 
   function toggleFinal(title: string) {
@@ -174,6 +240,7 @@ function App() {
     setFinalPicks([]);
     setRanking([]);
     setShareStatus("idle");
+    setHiddenFirst([]);
   }
 
   function addCustomValue(title: string) {
@@ -231,14 +298,14 @@ function App() {
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-linen text-ink">
-      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-8 pt-5 sm:max-w-xl">
+      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-44 pt-5 sm:max-w-xl">
         <header className="mb-5">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-rosewood/70">
               <Heart className="h-4 w-4 fill-blush text-rosewood" />
               The Values Game
             </div>
-            {(firstPicks.length > 0 || step > 1) && (
+            {(firstPicks.length > 0 || step > 1 || hiddenFirst.length > 0) && (
               <div className="flex items-center gap-2">
                 <button
                   className="grid h-10 w-10 place-items-center rounded-full bg-white/80 text-rosewood shadow-soft transition active:scale-95 disabled:cursor-not-allowed disabled:text-ink/20 disabled:shadow-none"
@@ -286,12 +353,15 @@ function App() {
               text="Choose the 10 qualities that matter most to you, in no particular order."
               roundLabel="Round 1 of 3"
               intro
-              values={values}
+              values={firstRoundValues}
               selected={firstPicks}
               target={10}
+              stepProgress={Math.round((firstPicks.length / 10) * 100)}
               onToggle={toggleFirst}
               onContinue={() => setStep(2)}
               onAddCustom={addCustomValue}
+              hiddenTitles={hiddenFirst}
+              onToggleHidden={toggleHiddenFirst}
             />
           )}
           {step === 2 && (
@@ -303,6 +373,7 @@ function App() {
               values={selectedTen}
               selected={finalPicks}
               target={5}
+              stepProgress={Math.round((finalPicks.length / 5) * 100)}
               onToggle={toggleFinal}
               onContinue={goToRank}
             />
@@ -327,7 +398,7 @@ function App() {
             />
           )}
         </AnimatePresence>
-        <footer className="mt-auto pb-24 pt-8 text-center text-[11px] leading-5 text-ink/45">
+        <footer className="mt-auto pb-36 pt-8 text-center text-[11px] leading-5 text-ink/45">
           Developed by Brian Moseley · May 2026 · For feedback email{" "}
           <a className="font-semibold text-rosewood/70" href="mailto:bmose14@gmail.com">
             bmose14@gmail.com
@@ -346,9 +417,12 @@ function PickStep({
   values: stepValues,
   selected,
   target,
+  stepProgress,
   onToggle,
   onContinue,
   onAddCustom,
+  hiddenTitles = [],
+  onToggleHidden,
 }: {
   title: string;
   text: string;
@@ -357,20 +431,25 @@ function PickStep({
   values: Value[];
   selected: string[];
   target: number;
+  stepProgress: number;
   onToggle: (title: string) => void;
   onContinue: () => void;
   onAddCustom?: (title: string) => boolean;
+  hiddenTitles?: string[];
+  onToggleHidden?: (title: string) => void;
 }) {
   const canContinue = selected.length === target;
   const left = Math.max(target - selected.length, 0);
   const [activeValue, setActiveValue] = React.useState<Value | null>(null);
+  const hiddenValues = stepValues.filter((value) => hiddenTitles.includes(value.title));
 
   React.useEffect(() => {
     setActiveValue((current) => {
+      if (selected.length === 0) return null;
       if (current && stepValues.some((value) => value.title === current.title)) return current;
       return null;
     });
-  }, [stepValues]);
+  }, [selected.length, stepValues]);
 
   function handleToggle(value: Value) {
     setActiveValue(value);
@@ -406,39 +485,88 @@ function PickStep({
           <p className="mt-1 text-xs leading-5 text-ink/62">{text}</p>
         </div>
         <div className="shrink-0 rounded-2xl bg-rosewood px-3 py-2 text-right text-[11px] font-bold leading-4 text-white shadow-soft">
-          <div>{selected.length} selected</div>
-          <div className="text-white/72">{left} left</div>
+          <div>{selected.length} picked</div>
+          <div className="text-white/78">{left} left</div>
         </div>
       </div>
 
-      <motion.div
-        key={activeValue?.title ?? "hint"}
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="fixed left-4 right-4 top-20 z-30 mx-auto max-w-md rounded-[1rem] border border-white/80 bg-white/95 p-3 shadow-lift backdrop-blur-xl"
-      >
-        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-honey">
-          {activeValue ? "What it means" : "Tap a card"}
-        </div>
-        <div className="mt-1 font-serif text-xl leading-5 text-ink">
-          {activeValue?.title ?? "See the meaning before you decide"}
-        </div>
-        <p className="mt-1 text-xs leading-5 text-ink/62">
-          {activeValue?.description ?? "Each value has a short explanation to help you choose from instinct and clarity."}
-        </p>
-      </motion.div>
+      {activeValue && selected.length > 0 && (
+        <motion.div
+          key={activeValue.title}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="pointer-events-none sticky top-4 z-20 mx-auto mb-3 max-w-md rounded-[1rem] border border-white/80 bg-white/95 p-3 shadow-lift backdrop-blur-xl"
+        >
+          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-honey">What it means</div>
+          <div className="mt-1 font-serif text-xl leading-5 text-ink">{activeValue.title}</div>
+          <p className="mt-1 text-xs leading-5 text-ink/62">{activeValue.description}</p>
+        </motion.div>
+      )}
 
-      <div className="grid grid-cols-4 gap-2 pb-24 pt-36">
+      <div className="grid grid-cols-4 gap-2 pb-60 pt-4">
         {stepValues.map((value, index) => (
           <ValueCard
             key={value.title}
             value={value}
             selected={selected.includes(value.title)}
             onToggle={handleToggle}
+            onHide={onToggleHidden ? () => onToggleHidden(value.title) : undefined}
+            canHide={!selected.includes(value.title) && Boolean(onToggleHidden)}
             index={index}
           />
         ))}
         {onAddCustom && <AddValueCard onAdd={onAddCustom} />}
+      </div>
+
+      <div className="pointer-events-none fixed inset-x-4 bottom-[5.5rem] z-10 mx-auto max-w-md rounded-[1.15rem] border border-white/85 bg-white/95 px-4 py-3 shadow-lift backdrop-blur-xl">
+        <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-rosewood/68">
+          <span>{roundLabel === "Round 1 of 3" ? "Pick 10" : "Narrow to 5"}</span>
+          <span>
+            {selected.length}/{target}
+          </span>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-[#f4e9e2]">
+          <motion.div
+            className="h-full rounded-full bg-gradient-to-r from-rosewood via-[#b06a61] to-sage"
+            animate={{ width: `${Math.min(stepProgress, 100)}%` }}
+            transition={{ type: "spring", stiffness: 120, damping: 18 }}
+          />
+        </div>
+        <div className="mt-2 text-[11px] leading-4 text-ink/58">
+          {selected.length === target ? "You’re ready to continue." : `${left} more to go.`}
+        </div>
+        {onToggleHidden && (
+          <div className="mt-3 border-t border-ink/8 pt-3">
+            <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.16em] text-honey">
+              <span>Holding pen</span>
+              <span>{hiddenValues.length} hidden</span>
+            </div>
+            {hiddenValues.length > 0 ? (
+              <>
+                <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {hiddenValues.map((value) => (
+                    <button
+                      key={value.title}
+                      type="button"
+                      onClick={() => onToggleHidden(value.title)}
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-rosewood/18 bg-[#fff4ef] px-3 py-1.5 text-xs font-semibold text-rosewood shadow-sm"
+                    >
+                      <EyeOff className="h-3.5 w-3.5" />
+                      {prettyTitle(value.title)}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-2 text-[11px] leading-4 text-ink/52">
+                  Tap a hidden card to bring it back.
+                </div>
+              </>
+            ) : (
+              <div className="rounded-[0.95rem] border border-dashed border-ink/10 bg-linen/75 px-3 py-3 text-[11px] leading-4 text-ink/45">
+                Hidden cards will collect here.
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <ActionBar
@@ -454,39 +582,60 @@ function ValueCard({
   value,
   selected,
   onToggle,
+  onHide,
+  canHide = false,
   index,
 }: {
   value: Value;
   selected: boolean;
   onToggle: (value: Value) => void;
+  onHide?: () => void;
+  canHide?: boolean;
   index: number;
 }) {
   return (
-    <motion.button
-      type="button"
+    <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.018, 0.25) }}
-      whileTap={{ scale: 0.985 }}
-      onClick={() => onToggle(value)}
-      className={`group relative flex aspect-[0.94] w-full items-center justify-center rounded-[1rem] border px-1.5 py-2 text-center shadow-soft transition ${
+      className={`group relative flex aspect-[0.94] w-full items-center justify-center overflow-hidden rounded-[1rem] border px-1.5 py-2 text-center shadow-soft transition ${
         selected
-          ? "border-rosewood/55 bg-[#fff4ef] shadow-lift"
+          ? "border-rosewood/70 bg-[#fff4ef] shadow-lift ring-1 ring-rosewood/10"
           : "border-white/90 bg-white/82 hover:border-blush hover:bg-white"
       }`}
-      aria-pressed={selected}
     >
-      <span className="break-words font-serif text-[clamp(0.66rem,2.6vw,0.92rem)] font-semibold leading-[1.05] text-ink">
-        {value.title}
-      </span>
+      {canHide && onHide && (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onHide();
+          }}
+          className="absolute left-1 top-1 grid h-5 w-5 place-items-center rounded-full border border-ink/12 bg-white/90 text-ink/42 transition hover:text-rosewood"
+          title="Hide this card"
+          aria-label={`Hide ${value.title}`}
+        >
+          <EyeOff className="h-3 w-3" />
+        </button>
+      )}
+      <button
+        type="button"
+        className="flex h-full w-full items-center justify-center"
+        onClick={() => onToggle(value)}
+        aria-pressed={selected}
+      >
+        <span className={`break-words font-serif text-[clamp(0.66rem,2.6vw,0.92rem)] font-semibold leading-[1.05] ${selected ? "text-rosewood" : "text-ink"}`}>
+          {value.title}
+        </span>
+      </button>
       <span
-        className={`absolute right-1 top-1 grid h-4 w-4 shrink-0 place-items-center rounded-full border transition ${
-          selected ? "border-rosewood bg-rosewood text-white" : "border-ink/12 bg-linen text-transparent"
+        className={`pointer-events-none absolute right-1 top-1 grid h-4 w-4 shrink-0 place-items-center rounded-full border transition ${
+          selected ? "border-rosewood bg-rosewood text-white shadow-sm" : "border-ink/12 bg-linen text-transparent"
         }`}
       >
         <Check className="h-2.5 w-2.5" />
       </span>
-    </motion.button>
+    </motion.div>
   );
 }
 
@@ -514,7 +663,7 @@ function AddValueCard({ onAdd }: { onAdd: (title: string) => boolean }) {
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         onSubmit={submit}
-        className="col-span-5 grid grid-cols-[1fr_auto] gap-2 rounded-[1rem] border border-rosewood/25 bg-white/88 p-2 shadow-soft"
+        className="col-span-4 grid grid-cols-[1fr_auto] gap-2 rounded-[1rem] border border-rosewood/25 bg-white/88 p-2 shadow-soft"
       >
         <div>
           <input
@@ -601,7 +750,7 @@ function RankStep({
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-xs font-bold uppercase tracking-[0.16em] text-honey">{rankLabels[index]}</div>
-                  <div className="mt-1 font-serif text-2xl leading-6">{value.title}</div>
+                  <div className="mt-1 font-serif text-2xl leading-6">{prettyTitle(value.title)}</div>
                   <div className="mt-1 text-sm leading-5 text-ink/55">{value.description}</div>
                 </div>
                 <GripVertical className="h-5 w-5 shrink-0 text-ink/24" />
@@ -664,40 +813,12 @@ function Results({
               </div>
               <div>
                 <div className="text-xs font-bold uppercase tracking-[0.15em] text-honey">{rankLabels[index]}</div>
-                <div className="mt-0.5 font-serif text-2xl leading-6">{value.title}</div>
+                <div className="mt-0.5 font-serif text-2xl leading-6">{prettyTitle(value.title)}</div>
                 <div className="mt-1 text-sm leading-5 text-ink/57">{value.description}</div>
               </div>
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="mt-4 space-y-3">
-        <div className="px-1 text-xs font-bold uppercase tracking-[0.18em] text-rosewood/60">Observations</div>
-        {profile.observations.map((insight) => (
-          <motion.div
-            key={insight}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="rounded-[1.25rem] border border-white/80 bg-white/72 p-4 text-sm leading-6 text-ink/68 shadow-soft"
-          >
-            {insight}
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="mt-4 space-y-3">
-        <div className="px-1 text-xs font-bold uppercase tracking-[0.18em] text-rosewood/60">Compare Over A Drink</div>
-        {profile.prompts.map((prompt) => (
-          <motion.div
-            key={prompt}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="rounded-[1.25rem] border border-white/80 bg-white/72 p-4 text-sm leading-6 text-ink/68 shadow-soft"
-          >
-            {prompt}
-          </motion.div>
-        ))}
       </div>
 
       <div className="mt-5 grid grid-cols-[1fr_auto] gap-3">
@@ -737,7 +858,9 @@ function ShareCardPreview({ rankedValues, profile }: { rankedValues: Value[]; pr
       <div className="space-y-2">
         {rankedValues.map((value, index) => (
           <div key={value.title} className="flex items-center justify-between rounded-2xl bg-white/9 px-3 py-2">
-            <span className="font-serif text-xl">{index + 1}. {value.title}</span>
+            <span className="font-serif text-xl">
+              {index + 1}. {prettyTitle(value.title)}
+            </span>
             <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/54">{rankLabels[index]}</span>
           </div>
         ))}
@@ -764,12 +887,12 @@ function ActionBar({
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-10 border-t border-white/80 bg-linen/88 px-4 py-4 backdrop-blur-xl">
+    <div className="fixed inset-x-0 bottom-0 z-10 border-t border-white/80 bg-linen/96 px-4 py-4 backdrop-blur-xl">
       <div className="mx-auto max-w-md sm:max-w-xl">
         <button
           disabled={disabled}
           onClick={handleClick}
-          className="h-14 w-full rounded-full bg-rosewood px-5 font-semibold text-white shadow-lift transition active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink/18 disabled:text-ink/40 disabled:shadow-none"
+          className="h-14 w-full rounded-full bg-rosewood px-5 font-semibold text-white shadow-lift transition active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-ink/18 disabled:text-ink/45 disabled:shadow-none"
         >
           {label}
         </button>
@@ -786,86 +909,60 @@ function buildResultProfile(rankedValues: Value[]): ResultProfile {
     rankedValues.some((value) => getValueThemes(value.title).some((theme) => themes.includes(theme)));
   const primaryHas = (...themes: Theme[]) =>
     rankedValues.slice(0, 2).some((value) => getValueThemes(value.title).some((theme) => themes.includes(theme)));
-  const themeScores = scoreThemes(rankedValues);
-  const topTheme = Object.entries(themeScores).sort((a, b) => b[1] - a[1])[0]?.[0] as Theme | undefined;
 
-  let archetype = "The Thoughtful Partner";
-  if (has("Practicality") && has("Efficiency") && has("Responsibility")) archetype = "The Practical Builder";
-  else if (has("Freedom") && (has("Adventure") || has("Spontaneity"))) archetype = "The Independent Explorer";
-  else if (has("Mature Love") && (has("Long-Term Partnership") || has("Loyalty"))) archetype = "The Devoted Partner";
-  else if (has("Rooted Family Life") && (has("Health") || has("Comfort"))) archetype = "The Grounded Homemaker";
-  else if (has("Value of Sex") && has("Mature Love") && has("Emotional Honesty")) archetype = "The Practical Romantic";
-  else if (primaryHas("family", "stability")) archetype = "The Grounded Builder";
-  else if (primaryHas("freedom", "adventure")) archetype = "The Independent Partner";
-  else if (primaryHas("connection", "sensuality")) archetype = "The Connected Romantic";
-  else if (primaryHas("growth", "status")) archetype = "The Ambitious Builder";
-  else if (primaryHas("spirituality")) archetype = "The Reflective Explorer";
+  let archetype = "The Considered Partner";
+  if (has("VALUE OF SEX") && (has("PLEASURE") || has("MATURE LOVE"))) archetype = "The Practical Romantic";
+  else if (has("FREEDOM") && (has("INDEPENDENCE") || has("CHOOSING MY OWN GOALS") || has("THIRST FOR ADVENTURE"))) {
+    archetype = "The Independent Explorer";
+  } else if (has("MATURE LOVE") && (has("TRUE FRIENDSHIP") || has("RESPONSIBILITY") || has("FORGIVENESS"))) {
+    archetype = "The Devoted Partner";
+  } else if (has("INNER HARMONY") && (has("SPIRITUAL LIFE") || has("UNITY WITH NATURE") || has("MEANING OF LIFE"))) {
+    archetype = "The Reflective Seeker";
+  } else if (has("WEALTH") && (has("SUCCESS") || has("SOCIAL POWER") || has("INFLUENCE"))) {
+    archetype = "The Capable Builder";
+  } else if (has("KINDNESS") && has("SENSE OF BELONGING")) {
+    archetype = "The Grounded Connector";
+  } else if (primaryHas("family", "stability")) {
+    archetype = "The Grounded Builder";
+  } else if (primaryHas("freedom", "adventure")) {
+    archetype = "The Independent Partner";
+  } else if (primaryHas("connection", "sensuality")) {
+    archetype = "The Connected Romantic";
+  } else if (primaryHas("growth", "status")) {
+    archetype = "The Ambitious Builder";
+  } else if (primaryHas("spirituality")) {
+    archetype = "The Reflective Explorer";
+  }
 
   const summary =
     first && second
-      ? `You seem oriented around ${first.title.toLowerCase()} and ${second.title.toLowerCase()}. That suggests you are not just choosing traits in a person; you are choosing the kind of daily life, pressure, and intimacy that would feel sustainable.`
+      ? `Your top pair leans toward ${prettyTitle(first.title)} and ${prettyTitle(second.title)}. That usually points to the kind of daily life, intimacy, and responsibility you want a relationship to hold together.`
       : "Your results are ready.";
-
-  const observations = unique([
-    has("Practicality") || has("Efficiency") || has("Responsibility")
-      ? "You appear to respect relationships that work in real life, not only in theory. Daily habits, clear decisions, and low unnecessary friction may matter more than grand gestures."
-      : "",
-    has("Freedom") || has("Spontaneity") || has("Adventure")
-      ? "You likely need a relationship with room to breathe. Closeness matters, but it probably has to leave space for movement, choice, and aliveness."
-      : "",
-    has("Mature Love") || has("Long-Term Partnership") || has("Loyalty")
-      ? "You seem drawn toward love as a long-horizon decision. Attraction matters, but consistency through ordinary seasons may be what makes it feel serious."
-      : "",
-    has("Rooted Family Life")
-      ? "Home and family may not be background details for you. They look more like the center of what a good life is supposed to protect."
-      : "",
-    has("Value of Sex")
-      ? "Sex appears to mean more than novelty or release here. In your hierarchy, physical chemistry may need to feel connected to trust, meaning, and affection."
-      : "",
-    has("Emotional Stability") || has("Resilience")
-      ? "You may be especially sensitive to how someone handles pressure. Calm, recovery, and steadiness are likely part of what makes a partner feel safe to build with."
-      : "",
-    has("Ambition") || has("Financial Abundance") || has("Refinement")
-      ? "You seem to want life to keep rising in quality. That may show up as ambition, taste, security, or a desire to build something visibly better over time."
-      : "",
-    has("Spiritual Life") || has("Unity with Nature")
-      ? "There is a reflective current in these choices. A relationship may feel incomplete if it never touches meaning, gratitude, nature, or something larger than the two of you."
-      : "",
-    topTheme === "connection"
-      ? "Connection is doing a lot of work in your top five. You may care less about performing romance and more about whether two people can actually meet each other honestly."
-      : "",
-  ]).slice(0, 3);
-
-  const fallbackObservations = [
-    "Your top values point toward a relationship that has to make sense both emotionally and practically.",
-    "You seem less interested in a perfect checklist and more interested in a life that would feel steady, alive, and worth building.",
-  ];
 
   const prompts = unique([
     hasAny("practicality")
-      ? "Where should a relationship be efficient and practical, and where should it stay spacious or unoptimized?"
+      ? "Where should love be simple and practical, and where should it stay human and unoptimized?"
       : "",
     hasAny("freedom", "adventure")
-      ? "How much independence do you both need before closeness starts to feel like pressure?"
+      ? "How much independence do you each need before closeness starts to feel crowded?"
       : "",
     hasAny("family")
       ? "What does a good home life actually look like day to day, not just someday?"
       : "",
     hasAny("connection", "sensuality")
-      ? "What makes intimacy feel meaningful rather than temporary?"
+      ? "What makes intimacy feel meaningful instead of just exciting?"
       : "",
     hasAny("growth", "status")
-      ? "What are you both trying to build, and what would you refuse to sacrifice to get there?"
+      ? "What are you trying to build together, and what would you refuse to trade to get it?"
       : "",
     hasAny("spirituality")
-      ? "What gives your life meaning when things are not exciting or easy?"
+      ? "What gives your life meaning when things are calm, ordinary, or hard?"
       : "",
   ]).slice(0, 2);
 
   return {
     archetype,
     summary,
-    observations: observations.length ? observations : fallbackObservations,
     prompts: prompts.length
       ? prompts
       : [
@@ -877,6 +974,15 @@ function buildResultProfile(rankedValues: Value[]): ResultProfile {
 
 function getValueThemes(title: string): Theme[] {
   return valueThemes[title] ?? ["custom"];
+}
+
+function prettyTitle(title: string) {
+  if (title !== title.toUpperCase()) return title;
+  return title
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 function scoreThemes(rankedValues: Value[]) {
@@ -894,8 +1000,8 @@ function unique(items: string[]) {
 }
 
 function buildShareText(rankedValues: Value[], profile: ResultProfile) {
-  const lines = rankedValues.map((value, index) => `${index + 1}. ${value.title} - ${rankLabels[index]}`);
-  return `My Values Game results:\n\n${profile.archetype}\n${profile.summary}\n\n${lines.join("\n")}\n\nQuestions worth comparing:\n${profile.prompts.join("\n")}`;
+  const lines = rankedValues.map((value, index) => `${index + 1}. ${prettyTitle(value.title)} - ${rankLabels[index]}`);
+  return `My Values Game results:\n\n${profile.archetype}\n${profile.summary}\n\n${lines.join("\n")}`;
 }
 
 async function createShareCardBlob(rankedValues: Value[], profile: ResultProfile) {
@@ -967,7 +1073,7 @@ async function createShareCardBlob(rankedValues: Value[], profile: ResultProfile
 
     ctx.fillStyle = "#fffaf3";
     ctx.font = "600 42px Georgia, serif";
-    ctx.fillText(value.title, 230, y + 78);
+    ctx.fillText(prettyTitle(value.title), 230, y + 78);
   });
 
   ctx.fillStyle = "rgba(255, 250, 243, 0.48)";
