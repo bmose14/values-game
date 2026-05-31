@@ -9,66 +9,60 @@ type Value = {
   description: string;
 };
 
-type Step = 1 | 2 | 3 | 4 | 5 | 6;
+type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 type ShareStatus = "idle" | "shared" | "copied" | "saved";
 
 const baseValues: Value[] = [
-  { title: "INNER HARMONY", description: "Feeling calm, centered, and at peace within yourself" },
-  { title: "EQUALITY", description: "Wanting fairness, mutual respect, and shared power" },
-  { title: "SOCIAL POWER", description: "Having influence, leverage, and a strong place in the room" },
-  { title: "PLEASURE", description: "Enjoying life through comfort, sensuality, and delight" },
-  { title: "FREEDOM", description: "Valuing autonomy, movement, and self-direction" },
-  { title: "SPIRITUAL LIFE", description: "Feeling connected to something greater than yourself" },
-  { title: "SENSE OF BELONGING", description: "Feeling accepted, included, and rooted with others" },
-  { title: "SOCIAL ORDER", description: "Preferring structure, rules, and a dependable social world" },
-  { title: "FULFILLMENT OF LIFE", description: "Wanting a life that feels whole, meaningful, and complete" },
-  { title: "MEANING OF LIFE", description: "Seeking purpose, direction, and a clear reason to live" },
-  { title: "KINDNESS", description: "Choosing warmth, care, and generosity toward others" },
-  { title: "WEALTH", description: "Creating financial security, options, and room to breathe" },
-  { title: "NATIONAL SECURITY", description: "Valuing safety, order, and protection at a larger scale" },
-  { title: "SELF-RESPECT", description: "Holding yourself to a standard and wanting to live with dignity" },
-  { title: "SUCCESS", description: "Wanting results, achievement, and visible momentum" },
-  { title: "CREATIVITY", description: "Expressing imagination, originality, and fresh thinking" },
-  { title: "PEACE IN THE WORLD", description: "Wanting harmony, reduced conflict, and a gentler world" },
-  { title: "RESPECT FOR TRADITIONS", description: "Valuing rituals, continuity, and inherited wisdom" },
-  { title: "MATURE LOVE", description: "Seeing love as steady, committed, and worth sacrifice" },
-  { title: "SELF-DISCIPLINE", description: "Choosing consistency, restraint, and self-control" },
-  { title: "CONFIDENTIALITY", description: "Protecting trust by keeping private things private" },
-  { title: "FAMILY SAFETY", description: "Wanting home, children, and loved ones to feel protected" },
-  { title: "SOCIAL RECOGNITION", description: "Wanting to be seen, respected, and publicly valued" },
-  { title: "UNITY WITH NATURE", description: "Feeling grounded through the natural world and the outdoors" },
-  { title: "DIVERSITY OF LIFE", description: "Welcoming variety, change, and many different experiences" },
-  { title: "WISDOM", description: "Valuing good judgment, perspective, and mature thinking" },
-  { title: "EMPOWERMENT", description: "Wanting agency, confidence, and real capacity to act" },
-  { title: "TRUE FRIENDSHIP", description: "Wanting trust, companionship, and genuine mutual liking" },
-  { title: "WORLD OF BEAUTY", description: "Seeking beauty, refinement, and aesthetically rich surroundings" },
-  { title: "SOCIAL JUSTICE", description: "Caring about fairness, dignity, and how people are treated" },
-  { title: "INDEPENDENCE", description: "Preferring self-reliance and the freedom to stand on your own" },
-  { title: "SELF-CONTROL", description: "Staying steady by managing impulses and emotions" },
-  { title: "VALUE OF SEX", description: "Seeing sex as meaningful, connective, and important" },
-  { title: "AMBITIOUSNESS", description: "Pursuing growth, achievement, and high goals" },
-  { title: "TOLERANCE", description: "Making room for differences, imperfection, and mixed views" },
-  { title: "MODESTY", description: "Preferring humility, restraint, and not making a fuss" },
-  { title: "THIRST FOR ADVENTURE", description: "Wanting exploration, novelty, and meaningful risk" },
-  { title: "PROTECTION OF THE ENVIRONMENT", description: "Caring about the natural world and long-term stewardship" },
-  { title: "INFLUENCE", description: "Wanting the ability to shape outcomes and affect others" },
-  { title: "RESPECT FOR PARENTS AND ELDERLY PEOPLE", description: "Honoring family, age, and the people who came before" },
-  { title: "CHOOSING MY OWN GOALS", description: "Wanting to set your own path rather than inherit one" },
-  { title: "HEALTH", description: "Protecting physical vitality, energy, and long-term well-being" },
-  { title: "COMPETENCE", description: "Being capable, effective, and able to solve problems" },
-  { title: "ACCEPTING ALL SIDES OF LIFE", description: "Making peace with complexity, hardship, and contradiction" },
-  { title: "HONESTY", description: "Telling the truth and wanting truth in return" },
-  { title: "REPUTATION", description: "Caring how you are known and whether your name carries weight" },
-  { title: "BEING HEARD", description: "Wanting your voice to matter and your perspective to land" },
-  { title: "INTELLECT", description: "Valuing thought, learning, and mental sharpness" },
-  { title: "ENJOYMENT OF LIFE", description: "Wanting life to feel good, alive, and worth savoring" },
-  { title: "USEFULNESS", description: "Wanting to contribute, help, and matter in practical ways" },
-  { title: "FAITH", description: "Trusting in God, belief, or a larger spiritual order" },
-  { title: "RESPONSIBILITY", description: "Owning obligations, consequences, and follow-through" },
-  { title: "CURIOSITY", description: "Wanting to learn, explore, and keep discovering" },
-  { title: "FORGIVENESS", description: "Making room for repair, mercy, and a second chance" },
-  { title: "CLEANLINESS", description: "Preferring order, neatness, and a tidy environment" },
-  { title: "SELF-EVALUATION", description: "Looking inward, reflecting honestly, and improving over time" },
+  // Family & partnership orientation
+  { title: "interdependence", description: "Believing strong people still need each other" },
+  { title: "shared life", description: "Wanting partnership to shape life, not just decorate it" },
+  { title: "mature love", description: "Love rooted in commitment, sacrifice, and long-term care" },
+  { title: "long-term partnership", description: "Building a meaningful life with one person over time" },
+  { title: "family devotion", description: "Prioritizing deep family bonds and future generations" },
+  { title: "parenthood", description: "Valuing the role of raising and guiding children" },
+  { title: "rootedness", description: "Desire for home, family, continuity, and a settled life" },
+  { title: "ordinary life", description: "Finding meaning in routine, rituals, and shared daily life" },
+  { title: "loyalty", description: "Remaining committed during difficult seasons" },
+  { title: "responsibility", description: "Taking ownership of obligations and consequences" },
+  { title: "sacrifice", description: "Willingness to give up something good for something greater" },
+  { title: "sense of belonging", description: "Feeling deeply connected to people and community" },
+  { title: "home life", description: "Creating a warm, stable private world together" },
+  { title: "tradition", description: "Respecting family rituals, continuity, and inherited wisdom" },
+  // Character & emotional maturity
+  { title: "emotional stability", description: "Remaining calm and reliable under stress" },
+  { title: "self-discipline", description: "Consistency and control over impulses, emotions, and behavior" },
+  { title: "clear expectations", description: "Saying what you need before silence becomes resentment" },
+  { title: "uncomfortable honesty", description: "Willingness to share difficult truths before they become betrayals" },
+  { title: "forgiveness", description: "Ability to repair, release resentment, and move forward" },
+  { title: "resilience", description: "Ability to endure hardship and adapt" },
+  { title: "practicality", description: "Prioritizing what works in real life" },
+  { title: "resourcefulness", description: "Solving problems with creativity and resilience" },
+  { title: "wisdom", description: "Judgment, maturity, and perspective" },
+  { title: "kindness", description: "Warmth shown consistently in ordinary moments" },
+  { title: "tenderness", description: "Softness, affection, and emotional warmth" },
+  // Mind, spirit & inner life
+  { title: "curiosity", description: "Desire to learn, explore, and stay mentally alive" },
+  { title: "creativity", description: "Imagination, originality, and expression" },
+  { title: "spiritual life", description: "Connection to something greater than yourself" },
+  { title: "unity with nature", description: "Feeling grounded and connected to the natural world" },
+  // Novelty & lifestyle orientation
+  { title: "freedom", description: "Autonomy and self-direction" },
+  { title: "adventure", description: "Desire for exploration and meaningful experiences" },
+  { title: "spontaneity", description: "Preference for novelty, flexibility, and unplanned experiences" },
+  { title: "luxury experiences", description: "Seeking refinement, travel, and elevated experiences" },
+  { title: "social vibrancy", description: "Desire for an active and culturally rich social life" },
+  { title: "personal fulfillment", description: "Prioritizing self-discovery and individual experience" },
+  { title: "reinvention", description: "Desire for continuous transformation and change" },
+  { title: "comfort", description: "Preference for ease, pleasure, and low friction" },
+  // Attraction, sex, beauty & ambition
+  { title: "value of sex", description: "Viewing sex as meaningful and connective" },
+  { title: "chemistry", description: "Magnetic attraction and romantic tension" },
+  { title: "playfulness", description: "Flirtation, humor, and lightness in love" },
+  { title: "beauty", description: "Appreciation for aesthetics, atmosphere, and elegance" },
+  { title: "health", description: "Physical vitality and long-term well-being" },
+  { title: "ambition", description: "Drive to build, achieve, and grow" },
+  { title: "financial abundance", description: "Creating security, freedom, and optionality" },
+  { title: "competence", description: "Capability, effectiveness, and mastery" },
 ];
 
 const rankLabels = ["Core Value", "Very Important", "Important", "Meaningful", "Still Matters"];
@@ -84,7 +78,7 @@ function pluralize(word: string, count: number) {
 
 function buildChooseText(availableCount: number, limit: number) {
   const cap = Math.min(limit, availableCount);
-  return `Choose up to ${cap} ${pluralize("quality", cap)} that matter most to you from this list. Tap the eye icon in the top-left corner of any card to hide it from view.`;
+  return `Choose up to ${cap} ${pluralize("value", cap)} that matter most to you from this list. Tap the eye icon in the top-left corner of any card to hide it from view.`;
 }
 
 function buildNarrowText(availableCount: number, limit: number) {
@@ -96,8 +90,14 @@ function buildNarrowText(availableCount: number, limit: number) {
   return `From your ${availableCount} ${pluralize("pick", availableCount)}, keep up to ${cap} that matter most.`;
 }
 
+function buildProgress(step: Step) {
+  if (step === 0) return 0;
+  if (step === 6) return 100;
+  return Math.round(((step - 1) / 5) * 100);
+}
+
 function App() {
-  const [step, setStep] = React.useState<Step>(1);
+  const [step, setStep] = React.useState<Step>(0);
   const [firstPicks, setFirstPicks] = React.useState<string[]>([]);
   const [secondPicks, setSecondPicks] = React.useState<string[]>([]);
   const [topTenPicks, setTopTenPicks] = React.useState<string[]>([]);
@@ -106,21 +106,34 @@ function App() {
   const [finalPicks, setFinalPicks] = React.useState<string[]>([]);
   const [ranking, setRanking] = React.useState<string[]>([]);
   const [shareStatus, setShareStatus] = React.useState<ShareStatus>("idle");
-  const [customValues, setCustomValues] = React.useState<Value[]>([]);
+  const [firstRoundCustomValues, setFirstRoundCustomValues] = React.useState<Value[]>([]);
+  const [secondRoundCustomValues, setSecondRoundCustomValues] = React.useState<Value[]>([]);
+  const [deckValues, setDeckValues] = React.useState<Value[]>(() => shuffleValues(baseValues));
 
-  const values = React.useMemo(() => [...baseValues, ...customValues], [customValues]);
-  const splitIndex = Math.ceil(baseValues.length / 2);
-  const firstRoundValues = React.useMemo(() => [...baseValues.slice(0, splitIndex), ...customValues], [customValues, splitIndex]);
-  const secondRoundValues = React.useMemo(() => baseValues.slice(splitIndex), [splitIndex]);
+  const customValues = React.useMemo(
+    () => [...firstRoundCustomValues, ...secondRoundCustomValues],
+    [firstRoundCustomValues, secondRoundCustomValues],
+  );
+  const values = React.useMemo(() => [...deckValues, ...customValues], [customValues, deckValues]);
+  const splitIndex = Math.ceil(deckValues.length / 2);
+  const firstRoundValues = React.useMemo(
+    () => [...deckValues.slice(0, splitIndex), ...firstRoundCustomValues],
+    [deckValues, firstRoundCustomValues, splitIndex],
+  );
+  const secondRoundValues = React.useMemo(
+    () => [...deckValues.slice(splitIndex), ...secondRoundCustomValues],
+    [deckValues, secondRoundCustomValues, splitIndex],
+  );
   const selectedTwenty = React.useMemo(
     () => values.filter((value) => firstPicks.includes(value.title) || secondPicks.includes(value.title)),
     [firstPicks, secondPicks, values],
   );
   const selectedTen = values.filter((value) => topTenPicks.includes(value.title));
   const rankedValues = ranking.map((title) => values.find((value) => value.title === title)).filter(Boolean) as Value[];
-  const progress = step === 6 ? 100 : Math.round(((step - 1) / 5) * 100);
-  const canGoBack = step > 1;
+  const progress = buildProgress(step);
+  const canGoBack = step > 0;
   const canGoForward = step >= 1 && step <= 5;
+  const showFooter = step === 0 || step === 6;
 
   React.useLayoutEffect(() => {
     const resetScroll = () => {
@@ -194,7 +207,7 @@ function App() {
 
   function goBack() {
     setStep((current) => {
-      const next = Math.max(1, current - 1) as Step;
+      const next = Math.max(0, current - 1) as Step;
 
       if (current === 2) {
         setSecondPicks([]);
@@ -246,7 +259,8 @@ function App() {
   }
 
   function restart() {
-    setStep(1);
+    setStep(0);
+    setDeckValues(shuffleValues(baseValues));
     setFirstPicks([]);
     setSecondPicks([]);
     setTopTenPicks([]);
@@ -255,17 +269,31 @@ function App() {
     setFinalPicks([]);
     setRanking([]);
     setShareStatus("idle");
+    setFirstRoundCustomValues([]);
+    setSecondRoundCustomValues([]);
   }
 
-  function addCustomValue(title: string) {
+  function shuffleValues(items: Value[]) {
+    const next = [...items];
+    for (let index = next.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [next[index], next[randomIndex]] = [next[randomIndex], next[index]];
+    }
+
+    return next;
+  }
+
+  function addCustomValue(title: string, round: "first" | "second") {
     const cleanTitle = title.trim().replace(/\s+/g, " ");
     if (!cleanTitle) return false;
     if (values.some((value) => value.title.toLowerCase() === cleanTitle.toLowerCase())) return false;
 
-    setCustomValues((current) => [
-      ...current,
-      { title: cleanTitle, description: "A value you added" },
-    ]);
+    const nextValue = { title: cleanTitle, description: "A value you added" };
+    if (round === "first") {
+      setFirstRoundCustomValues((current) => [...current, nextValue]);
+    } else {
+      setSecondRoundCustomValues((current) => [...current, nextValue]);
+    }
     return true;
   }
 
@@ -318,7 +346,7 @@ function App() {
               <Heart className="h-4 w-4 fill-blush text-rosewood" />
               The Values Game
             </div>
-            {(firstPicks.length > 0 || step > 1) && (
+            {step > 0 && (
               <div className="flex items-center gap-2">
                 <button
                   className="grid h-10 w-10 place-items-center rounded-full bg-white/80 text-rosewood shadow-soft transition active:scale-95 disabled:cursor-not-allowed disabled:text-ink/20 disabled:shadow-none"
@@ -359,13 +387,18 @@ function App() {
         </header>
 
         <AnimatePresence mode="wait">
+          {step === 0 && (
+            <IntroStep
+              key="step-0"
+              onContinue={() => setStep(1)}
+            />
+          )}
           {step === 1 && (
             <PickStep
               key="step-1"
               title="Pick 10"
               text={buildChooseText(firstRoundValues.length, 10)}
               roundLabel="Round 1 of 5"
-              intro
               values={firstRoundValues}
               selected={firstPicks}
               target={10}
@@ -373,7 +406,7 @@ function App() {
               hidden={hiddenFirst}
               onToggleHidden={toggleHiddenFirst}
               onContinue={() => setStep(2)}
-              onAddCustom={addCustomValue}
+              onAddCustom={(title) => addCustomValue(title, "first")}
             />
           )}
           {step === 2 && (
@@ -389,6 +422,7 @@ function App() {
               hidden={hiddenSecond}
               onToggleHidden={toggleHiddenSecond}
               onContinue={() => setStep(3)}
+              onAddCustom={(title) => addCustomValue(title, "second")}
             />
           )}
           {step === 3 && (
@@ -437,20 +471,26 @@ function App() {
             />
           )}
         </AnimatePresence>
-        <footer className="mt-auto border-t border-white/65 pb-40 pt-6 text-center text-[11px] leading-5 text-ink/55">
-          <div>
-            Developed by Brian Moseley · {APP_VERSION}
-          </div>
-          <div>
-            Last Updated: {APP_LAST_UPDATED}
-          </div>
-          <div>
-            Feedback or comments email{" "}
-            <a className="font-semibold text-rosewood/70" href="mailto:bmose14+values@gmail.com">
-              bmose14+values@gmail.com
-            </a>
-          </div>
-        </footer>
+        {showFooter && (
+          <footer
+            className={`border-t border-white/65 pt-6 text-center text-[11px] leading-5 text-ink/55 ${
+              step === 0 ? "mt-8 pb-40" : "mt-6 pb-10"
+            }`}
+          >
+            <div>
+              Developed by Brian Moseley · {APP_VERSION}
+            </div>
+            <div>
+              Last Updated: {APP_LAST_UPDATED}
+            </div>
+            <div>
+              Feedback or comments email{" "}
+              <a className="font-semibold text-rosewood/70" href="mailto:bmose14+values@gmail.com">
+                bmose14+values@gmail.com
+              </a>
+            </div>
+          </footer>
+        )}
       </div>
     </main>
   );
@@ -460,7 +500,6 @@ function PickStep({
   title,
   text,
   roundLabel,
-  intro = false,
   values: stepValues,
   selected,
   target,
@@ -473,7 +512,6 @@ function PickStep({
   title: string;
   text: string;
   roundLabel: string;
-  intro?: boolean;
   values: Value[];
   selected: string[];
   target: number;
@@ -486,8 +524,6 @@ function PickStep({
   const left = Math.max(target - selected.length, 0);
   const progress = target ? Math.min(selected.length / target, 1) * 100 : 0;
   const [activeValue, setActiveValue] = React.useState<Value | null>(null);
-  const [showExplainer, setShowExplainer] = React.useState(false);
-  const scrollAnchorRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     setActiveValue((current) => {
@@ -495,21 +531,6 @@ function PickStep({
       return null;
     });
   }, [stepValues]);
-
-  React.useEffect(() => {
-    const anchor = scrollAnchorRef.current;
-    if (!anchor) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setShowExplainer(!entry.isIntersecting);
-      },
-      { threshold: 0.01 },
-    );
-
-    observer.observe(anchor);
-    return () => observer.disconnect();
-  }, []);
 
   function handleToggle(value: Value) {
     setActiveValue(value);
@@ -524,20 +545,6 @@ function PickStep({
       transition={{ duration: 0.28 }}
       className="flex flex-1 flex-col"
     >
-      {intro && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="mb-3 rounded-[1.25rem] border border-white/80 bg-white/70 p-3.5 shadow-soft backdrop-blur"
-        >
-          <Sparkles className="mb-2 h-4 w-4 text-honey" />
-          <h1 className="font-serif text-4xl leading-[0.92] text-rosewood">The Values Game</h1>
-          <p className="mt-2 text-[13px] leading-5 text-ink/74">
-            Most people think they know their type. But few have actually taken the time to understand their values.
-          </p>
-        </motion.div>
-      )}
-
       <div className="mb-3 flex items-end justify-between gap-3">
         <div>
           <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-rosewood/62">{roundLabel}</div>
@@ -549,30 +556,6 @@ function PickStep({
           <div className="text-white/72">{left} left</div>
         </div>
       </div>
-
-      <div ref={scrollAnchorRef} className="h-px w-full" aria-hidden="true" />
-
-      <AnimatePresence>
-        {showExplainer && (
-          <motion.div
-            key={activeValue?.title ?? "hint"}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 6 }}
-            className="fixed left-4 right-4 top-24 z-30 mx-auto max-w-md rounded-[1rem] border border-white/80 bg-white/95 p-3 shadow-lift backdrop-blur-xl sm:max-w-xl"
-          >
-            <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-honey">
-              {activeValue ? "What it means" : "Tap a card"}
-            </div>
-            <div className="mt-1 font-serif text-xl leading-5 text-ink">
-              {activeValue?.title ?? "See the meaning before you decide"}
-            </div>
-            <p className="mt-1 text-xs leading-5 text-ink/62">
-              {activeValue?.description ?? "Each value has a short explanation to help you choose from instinct and clarity."}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <div className="grid grid-cols-4 gap-2 pb-24 pt-10">
         {stepValues.map((value, index) => (
@@ -590,6 +573,17 @@ function PickStep({
       </div>
 
       <div className="fixed inset-x-4 bottom-[5.1rem] z-10 mx-auto max-w-md rounded-[1rem] border border-white/80 bg-white/88 px-3 py-2 shadow-soft backdrop-blur-xl sm:max-w-xl">
+        <div className="mb-2 rounded-[0.85rem] bg-linen/75 px-2.5 py-2">
+          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-honey">
+            {activeValue ? "What it means" : "Tap a card"}
+          </div>
+          <div className="mt-1 font-serif text-base leading-5 text-ink">
+            {activeValue?.title ?? "See the meaning before you decide"}
+          </div>
+          <p className="mt-1 text-[11px] leading-4 text-ink/62">
+            {activeValue?.description ?? "Each value has a short explanation to help you choose from instinct and clarity."}
+          </p>
+        </div>
         <div className="mb-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-rosewood/62">
           <span>{left} left to pick</span>
           <span>
@@ -609,6 +603,44 @@ function PickStep({
         label="Continue"
         onClick={onContinue}
       />
+    </motion.section>
+  );
+}
+
+function IntroStep({ onContinue }: { onContinue: () => void }) {
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -18 }}
+      transition={{ duration: 0.28 }}
+      className="flex flex-1 flex-col"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="rounded-[1.25rem] border border-white/80 bg-white/70 p-4 shadow-soft backdrop-blur"
+      >
+        <Sparkles className="mb-2 h-4 w-4 text-honey" />
+        <h1 className="font-serif text-4xl leading-[0.92] text-rosewood">The Values Game</h1>
+        <p className="mt-2 text-[13px] italic leading-5 text-ink/62">"You can have anything you want, but not everything you want."</p>
+        <div className="mt-3 space-y-2 text-[13px] leading-5 text-ink/74">
+          <p>Most people think they know what they want. Usually, they know their preferences.</p>
+          <p>Values are different.</p>
+          <p>Preferences are what you like when everything is easy. Values are what you choose when good things compete.</p>
+          <p>This is a short card game that helps you see what matters most.</p>
+        </div>
+        <div className="mt-3 rounded-[1rem] border border-rosewood/10 bg-white/80 p-3">
+          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-rosewood/70">How to play</div>
+          <div className="mt-2 space-y-2 text-[12px] leading-5 text-ink/72">
+            <p>You’ll be shown a series of value cards. Choose up to 10 qualities that matter most to you. Tap the eye icon in the top-left corner of any card to hide it from view.</p>
+            <p>Once you’ve picked your 10, you’ll narrow them down until only your top values remain.</p>
+            <p>The point isn’t to choose the “right” answers. It’s to see what rises to the top when there are multiple appealing options.</p>
+          </div>
+        </div>
+      </motion.div>
+
+      <ActionBar label="Begin" onClick={onContinue} />
     </motion.section>
   );
 }
